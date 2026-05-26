@@ -4,9 +4,10 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { serverUrl } from '../App'
 import { useState } from 'react'
-import { ArrowLeft, Code, Code2, MessageCircle, MessageSquare, Monitor, Rocket, Send, X } from 'lucide-react'
+import { ArrowLeft, Code, Code2, History, MessageCircle, MessageSquare, Monitor, Rocket, Send, X } from 'lucide-react'
 import { useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import VersionHistoryPanel from '../components/VersionHistoryPanel'
 
 import Editor from '@monaco-editor/react';
 function WebsiteEditor() {
@@ -22,6 +23,7 @@ function WebsiteEditor() {
     const [showCode, setShowCode] = useState(false)
     const [showFullPreview, setShowFullPreview] = useState(false)
     const [showChat, setShowChat] = useState(false)
+    const [showHistory, setShowHistory] = useState(false)
     const thinkingSteps = [
         "Understanding your request…",
         "Planning layout changes…",
@@ -165,6 +167,7 @@ function WebsiteEditor() {
                        
                         <button className='p-2 lg:hidden' onClick={() => setShowChat(true)}><MessageSquare size={18} /></button>
 
+                        <button className='p-2' onClick={() => setShowHistory((v) => !v)} title="Version History"><History size={18} /></button>
                         <button className='p-2' onClick={() => setShowCode(true)}><Code2 size={18} /></button>
                         <button className='p-2' onClick={() => setShowFullPreview(true)}><Monitor size={18} /></button>
                     </div>
@@ -249,6 +252,19 @@ function WebsiteEditor() {
                         />
 
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {showHistory && (
+                    <VersionHistoryPanel
+                        websiteId={id}
+                        onClose={() => setShowHistory(false)}
+                        onRestore={(restoredCode) => {
+                            setCode(restoredCode)
+                            setShowHistory(false)
+                        }}
+                    />
                 )}
             </AnimatePresence>
 

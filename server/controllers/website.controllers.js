@@ -2,6 +2,7 @@ import { generateResponse } from "../config/openRouter.js"
 import Website from "../models/website.model.js"
 import extractJson  from "../utils/extractJson.js"
 import User from "../models/user.model.js"
+import { saveVersion } from "../utils/saveVersion.js"
 
 const masterPrompt = `
 YOU ARE A PRINCIPAL FRONTEND ARCHITECT
@@ -304,6 +305,8 @@ RETURN RAW JSON ONLY:
           {role:"user" , content:prompt},
           {role:"ai" , content:parsed.message}
         )
+
+        await saveVersion(website._id, req.user._id, website.latestCode, prompt.slice(0, 100))
 
         website.latestCode = parsed.code 
 

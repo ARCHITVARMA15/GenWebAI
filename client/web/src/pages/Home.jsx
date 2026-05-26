@@ -24,7 +24,7 @@ function Home() {
     const handleLogOut = async () => {
         console.log("logout click")
         try {
-            await axios.get(`${serverUrl}/api/auth/logout`, { withCredentials: true })
+            await axios.post(`${serverUrl}/api/auth/logout`, {}, { withCredentials: true })
             dispatch(setUserData(null))
             setOpenProfile(false)
         } catch (error) {
