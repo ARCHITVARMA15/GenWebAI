@@ -7,6 +7,10 @@ import { useSelector } from 'react-redux';
 import Dashboard from './pages/Dashboard';
 import Generate from './pages/Generate';
 import Editor from './pages/Editor';
+import Pricing from './pages/Pricing';
+import LiveSite from './pages/LiveSite';
+
+export const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 
 function App(){
@@ -25,6 +29,8 @@ function App(){
         <Route path="/dashboard" element={userData ? <Dashboard /> : <Home/> } />
         <Route path="/generate" element={userData ? <Generate /> : <Home/> } />
         <Route path="/editor/:id" element={userData ? <Editor /> : <Home />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/site/:id" element={<LiveSite />} />
       </Routes>
     </BrowserRouter>
   )
