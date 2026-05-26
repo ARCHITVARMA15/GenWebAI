@@ -35,3 +35,26 @@ export const generateResponse = async (prompt) => {
     return data.choices[0].message.content
 }
 
+export const generateResponseStream = async (prompt) => {
+    const res = await fetch(openRouterUrl, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            model: model,
+            messages: [
+                { role: 'system', content: "You must return ONLY valid raw JSON." },
+                { role: 'user', content: prompt },
+            ],
+            temperature: 0.2,
+            stream: true
+        }),
+    })
+    if (!res.ok) {
+        const error = await res.text()
+        throw new Error(`OpenRouter API error: ${error}`)
+    }
+    return res.body
+}

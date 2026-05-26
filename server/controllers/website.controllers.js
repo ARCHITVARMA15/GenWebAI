@@ -1,4 +1,4 @@
-import { generateResponse } from "../config/openRouter.js"
+import { generateResponse, generateResponseStream } from "../config/openRouter.js"
 import Website from "../models/website.model.js"
 import extractJson  from "../utils/extractJson.js"
 import User from "../models/user.model.js"
@@ -382,4 +382,79 @@ export const getBySlug = async(req, res)=>{
   }
 }
 
+export const generateWebsiteStream = async (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Connection', 'keep-alive')
+    res.setHeader('X-Accel-Buffering', 'no')
+    res.flushHeaders()
+
+    const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`)
+
+    try {
+        const { prompt } = req.body
+        if (!prompt) { send({ error: 'prompt is required' }); return }
+
+        const user = await User.findById(req.user._id)
+        if (!user) { send({ error: 'user not found' }); return }
+        if (user.credits < 50) { send({ error: 'not enough credits to generate a website' }); return }
+
+        const finalPrompt = masterPrompt.replace('{USER_PROMPT}', prompt)
+        const streamBody = await generateResponseStream(finalPrompt)
+
+        const reader = streamBody.getReader()
+        const decoder = new TextDecoder()
+        let fullContent = ''
+        let buffer = ''
+
+        while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            buffer += decoder.decode(value, { stream: true })
+            const lines = buffer.split('\n')
+            buffer = lines.pop()
+            for (const line of lines) {
+                if (!line.startsWith('data: ')) continue
+                const raw = line.slice(6).trim()
+                if (raw === '[DONE]') continue
+                try {
+                    const parsed = JSON.parse(raw)
+                    const token = parsed.choices?.[0]?.delta?.content || ''
+                    if (token) {
+                        fullContent += token
+                        send({ chunk: token })
+                    }
+                } catch (_) {}
+            }
+        }
+
+        let parsed = await extractJson(fullContent)
+        if (!parsed) {
+            const retryRaw = await generateResponse(finalPrompt + '\n\nRETURN ONLY RAW JSON.')
+            parsed = await extractJson(retryRaw)
+        }
+
+        if (!parsed?.code) { send({ error: 'AI returned invalid response' }); return }
+
+        const website = await Website.create({
+            user: user._id,
+            title: prompt.slice(0, 60),
+            latestCode: parsed.code,
+            conversation: [
+                { role: 'ai', content: parsed.message || 'Website generated' },
+                { role: 'user', content: prompt }
+            ]
+        })
+
+        user.credits = user.credits - 50
+        await user.save()
+
+        send({ done: true, websiteId: website._id, creditsLeft: user.credits })
+
+    } catch (error) {
+        send({ error: error.message || String(error) })
+    } finally {
+        res.end()
+    }
+}
 

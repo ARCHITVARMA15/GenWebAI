@@ -1,7 +1,7 @@
 import express from  "express"
 
 import isAuth from "../middlewares/isAuth.js"
-import { changes, deploy, generateWebsite, getAll, getBySlug, getWebsiteById } from "../controllers/website.controllers.js"
+import { changes, deploy, generateWebsite, generateWebsiteStream, getAll, getBySlug, getWebsiteById } from "../controllers/website.controllers.js"
 import { getVersions, getVersionContent, rollback } from "../controllers/version.controllers.js"
 
 
@@ -12,6 +12,7 @@ const websiteRouter = express.Router()
 
 
 websiteRouter.post("/generate",isAuth,generateWebsite)
+websiteRouter.post("/generate-stream",isAuth,generateWebsiteStream)
 websiteRouter.post("/update/:id",isAuth,changes)
 websiteRouter.get("/get-by-id/:id",isAuth,getWebsiteById)
 websiteRouter.get("/get-all" , isAuth , getAll)
