@@ -86,10 +86,11 @@
 // export default Generate
 
 
-import { ArrowLeft, X } from 'lucide-react'
+import { ArrowLeft, Lock, X, Zap } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from "motion/react"
+import axios from 'axios'
 import { serverUrl } from '../App'
 
 const PHASES = [
@@ -109,9 +110,17 @@ function Generate() {
     const [error, setError] = useState("")
     const [streamedContent, setStreamedContent] = useState("")
     const [websiteId, setWebsiteId] = useState(null)
+    const [selectedModel, setSelectedModel] = useState('gemini')
+    const [models, setModels] = useState([])
     const abortRef = useRef(null)
 
     const charCount = streamedContent.length
+
+    useEffect(() => {
+        axios.get(`${serverUrl}/api/ai/models`, { withCredentials: true })
+            .then(r => setModels(r.data.data))
+            .catch(() => {})
+    }, [])
 
     const handleGenerateWebsite = async () => {
         setLoading(true)
@@ -127,7 +136,7 @@ function Generate() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ prompt }),
+                body: JSON.stringify({ prompt, model: selectedModel }),
                 signal: controller.signal,
             })
 
@@ -226,6 +235,44 @@ function Generate() {
 
                 {!loading && !websiteId && (
                     <>
+                        {models.length > 0 && (
+                            <div className='mb-8'>
+                                <h2 className='text-sm font-semibold text-zinc-400 uppercase tracking-widest mb-3'>Choose AI Model</h2>
+                                <div className='grid grid-cols-1 sm:grid-cols-3 gap-3'>
+                                    {models.map(m => {
+                                        const isSelected = selectedModel === m.key
+                                        return (
+                                            <button
+                                                key={m.key}
+                                                onClick={() => m.isAvailable && setSelectedModel(m.key)}
+                                                disabled={!m.isAvailable}
+                                                className={`relative text-left p-4 rounded-2xl border transition ${
+                                                    !m.isAvailable
+                                                        ? 'border-white/5 bg-white/3 opacity-50 cursor-not-allowed'
+                                                        : isSelected
+                                                            ? 'border-indigo-500/60 bg-indigo-500/10'
+                                                            : 'border-white/10 bg-white/5 hover:bg-white/8 cursor-pointer'
+                                                }`}
+                                            >
+                                                <div className='flex items-start justify-between gap-2 mb-1.5'>
+                                                    <span className='text-sm font-semibold'>{m.label}</span>
+                                                    {!m.isAvailable
+                                                        ? <span className='flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700'><Lock size={9} />Pro</span>
+                                                        : m.badge && <span className='text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-300'>{m.badge}</span>
+                                                    }
+                                                </div>
+                                                <p className='text-xs text-zinc-400 mb-2'>{m.description}</p>
+                                                <div className='flex items-center gap-1 text-[11px] text-zinc-500'>
+                                                    <Zap size={10} className='text-yellow-500' />
+                                                    {m.creditsPerGeneration} credits
+                                                </div>
+                                                {isSelected && <div className='absolute top-3 right-3 w-2 h-2 rounded-full bg-indigo-400' />}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )}
                         <div className='mb-14'>
                             <h1 className='text-xl font-semibold mb-2'>Describe your website</h1>
                             <textarea

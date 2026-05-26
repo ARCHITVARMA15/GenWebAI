@@ -3,6 +3,7 @@ import Website from "../models/website.model.js"
 import extractJson  from "../utils/extractJson.js"
 import User from "../models/user.model.js"
 import { saveVersion } from "../utils/saveVersion.js"
+import aiModels from "../config/aiModels.js"
 
 const generateTimestamps = new Map()
 
@@ -171,19 +172,28 @@ ABSOLUTE RULES
 
 export const generateWebsite = async (req, res) => {
     try{
-      const {prompt}  = req.body
+      const { prompt, model: modelKey = 'gemini' } = req.body
       if(!prompt){
         return res.status(400).json({message:"prompt is required"})
-
       }
+
+      const selectedModel = aiModels[modelKey]
+      if(!selectedModel){
+        return res.status(400).json({message:"Invalid model selected"})
+      }
+
       const user = await User.findById(req.user._id);
       if(!user){
         return res.status(400).json({message:"user not found"})
       }
 
+      if(!selectedModel.available.includes(user.plans)){
+        return res.status(403).json({message:"Upgrade your plan to use this model"})
+      }
+
       trackGenerate(req.user._id.toString())
 
-      if(user.credits<50){
+      if(user.credits < selectedModel.creditsPerGeneration){
         return res.status(400).json({message:"not enough credits to generate a website"}) 
       }
 
@@ -191,13 +201,12 @@ export const generateWebsite = async (req, res) => {
     let raw = ""
     let parsed =null
     for(let i=0;i<2 && !parsed;i++){
-        raw = await generateResponse(finalPrompt)
+        raw = await generateResponse(finalPrompt, selectedModel.modelId)
         parsed = await extractJson(raw)
 
         if(!parsed){
-            raw = await generateResponse(finalPrompt + "\n\nRETURN ONLY RAW JSON.");
+            raw = await generateResponse(finalPrompt + "\n\nRETURN ONLY RAW JSON.", selectedModel.modelId);
             parsed = await extractJson(raw)
-
         }
     }
 
@@ -210,6 +219,7 @@ export const generateWebsite = async (req, res) => {
         user:user._id,
         title:prompt.slice(0,60),
         latestCode:parsed.code,
+        modelUsed: modelKey,
         conversation: [
             {
                 role:"ai",
@@ -219,12 +229,10 @@ export const generateWebsite = async (req, res) => {
                 role:"user",
                 content:prompt
             }
-            
-
         ]
     })
 
-    user.credits = user.credits - 50;
+    user.credits = user.credits - selectedModel.creditsPerGeneration;
     await user.save();
 
     return res.status(201).json({
@@ -232,11 +240,8 @@ export const generateWebsite = async (req, res) => {
         remainingCredits:user.credits
     })
 
-
-
     }catch(error){
       return res.status(500).json({message:`generate website error ${error?.message || error}`})
-
     }
 }
 
@@ -410,17 +415,26 @@ export const generateWebsiteStream = async (req, res) => {
     const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`)
 
     try {
-        const { prompt } = req.body
+        const { prompt, model: modelKey = 'gemini' } = req.body
         if (!prompt) { send({ error: 'prompt is required' }); return }
+
+        const selectedModel = aiModels[modelKey]
+        if (!selectedModel) { send({ error: 'Invalid model selected' }); return }
 
         const user = await User.findById(req.user._id)
         if (!user) { send({ error: 'user not found' }); return }
-        if (user.credits < 50) { send({ error: 'not enough credits to generate a website' }); return }
+
+        if (!selectedModel.available.includes(user.plans)) {
+            send({ error: 'Upgrade your plan to use this model' })
+            return
+        }
+
+        if (user.credits < selectedModel.creditsPerGeneration) { send({ error: 'not enough credits to generate a website' }); return }
 
         trackGenerate(req.user._id.toString())
 
         const finalPrompt = masterPrompt.replace('{USER_PROMPT}', prompt)
-        const streamBody = await generateResponseStream(finalPrompt)
+        const streamBody = await generateResponseStream(finalPrompt, selectedModel.modelId)
 
         const reader = streamBody.getReader()
         const decoder = new TextDecoder()
@@ -450,7 +464,7 @@ export const generateWebsiteStream = async (req, res) => {
 
         let parsed = await extractJson(fullContent)
         if (!parsed) {
-            const retryRaw = await generateResponse(finalPrompt + '\n\nRETURN ONLY RAW JSON.')
+            const retryRaw = await generateResponse(finalPrompt + '\n\nRETURN ONLY RAW JSON.', selectedModel.modelId)
             parsed = await extractJson(retryRaw)
         }
 
@@ -460,13 +474,14 @@ export const generateWebsiteStream = async (req, res) => {
             user: user._id,
             title: prompt.slice(0, 60),
             latestCode: parsed.code,
+            modelUsed: modelKey,
             conversation: [
                 { role: 'ai', content: parsed.message || 'Website generated' },
                 { role: 'user', content: prompt }
             ]
         })
 
-        user.credits = user.credits - 50
+        user.credits = user.credits - selectedModel.creditsPerGeneration
         await user.save()
 
         send({ done: true, websiteId: website._id, creditsLeft: user.credits })

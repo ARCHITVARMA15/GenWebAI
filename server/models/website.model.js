@@ -47,6 +47,10 @@ const websiteSchema = new mongoose.Schema({
     type:String,
     unique:true,
     sparse:true
+   },
+   modelUsed:{
+    type:String,
+    default:"gemini"
    }
 
 

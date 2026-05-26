@@ -1,9 +1,8 @@
 const openRouterUrl = "https://openrouter.ai/api/v1/chat/completions";
 
+const defaultModel = "google/gemini-flash-1.5";
 
-const model = "deepseek/deepseek-chat";
-
-export const generateResponse = async (prompt) => {
+export const generateResponse = async (prompt, modelId = defaultModel) => {
     const res = await fetch(openRouterUrl, {
         method: 'POST',
         headers: {
@@ -12,7 +11,7 @@ export const generateResponse = async (prompt) => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            model: model,
+            model: modelId,
             messages: [
 
                 {
@@ -35,7 +34,7 @@ export const generateResponse = async (prompt) => {
     return data.choices[0].message.content
 }
 
-export const generateResponseStream = async (prompt) => {
+export const generateResponseStream = async (prompt, modelId = defaultModel) => {
     const res = await fetch(openRouterUrl, {
         method: 'POST',
         headers: {
@@ -43,7 +42,7 @@ export const generateResponseStream = async (prompt) => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            model: model,
+            model: modelId,
             messages: [
                 { role: 'system', content: "You must return ONLY valid raw JSON." },
                 { role: 'user', content: prompt },
