@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, BarChart2, LayoutGrid, Rocket, Share2 } from 'lucide-react'
+import { ArrowLeft, Check, BarChart2, Globe, LayoutGrid, Rocket, Share2, X } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { motion } from "motion/react"
 import { useSelector } from 'react-redux'
@@ -14,6 +14,9 @@ function Dashboard() {
     const [error, setError] = useState("")
     const [copiedId, setCopiedId] = useState(null)
     const [activeTab, setActiveTab] = useState('websites')
+    const [publishModalId, setPublishModalId] = useState(null)
+    const [publishTags, setPublishTags] = useState('')
+    const [publishLoading, setPublishLoading] = useState(false)
     const handleDeploy = async (id) => {
         try {
             const result = await axios.get(`${serverUrl}/api/website/deploy/${id}`, { withCredentials: true })
@@ -51,6 +54,29 @@ function Dashboard() {
         await navigator.clipboard.writeText(site.deployUrl)
         setCopiedId(site._id)
         setTimeout(() => setCopiedId(null), 2000)
+    }
+
+    const handlePublish = async (id) => {
+        setPublishLoading(true)
+        try {
+            const tags = publishTags.split(',').map(t => t.trim()).filter(Boolean)
+            await axios.post(`${serverUrl}/api/gallery/${id}/publish`, { tags }, { withCredentials: true })
+            setWebsites(prev => prev.map(w => w._id === id ? { ...w, isPublished: true, tags } : w))
+            setPublishModalId(null)
+            setPublishTags('')
+        } catch (err) {
+            console.log(err)
+        }
+        setPublishLoading(false)
+    }
+
+    const handleUnpublish = async (id) => {
+        try {
+            await axios.post(`${serverUrl}/api/gallery/${id}/unpublish`, {}, { withCredentials: true })
+            setWebsites(prev => prev.map(w => w._id === id ? { ...w, isPublished: false } : w))
+        } catch (err) {
+            console.log(err)
+        }
     }
 
     return (
@@ -131,6 +157,17 @@ function Dashboard() {
                                         {new Date(w.updatedAt).toLocaleDateString()}
                                     </p>
 
+                                    <button
+                                        onClick={() => w.isPublished ? handleUnpublish(w._id) : setPublishModalId(w._id)}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition ${
+                                            w.isPublished
+                                                ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400 hover:bg-rose-500/10 hover:border-rose-500/25 hover:text-rose-400'
+                                                : 'bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white'
+                                        }`}
+                                    >
+                                        <Globe size={12} />
+                                        {w.isPublished ? 'Published' : 'Publish'}
+                                    </button>
                                     {!w.deployed ? (
                                         <button className=" mt-auto flex items-center justify-center gap-2
                           px-4 py-2 rounded-xl text-sm font-semibold
@@ -174,9 +211,45 @@ function Dashboard() {
                     </div>
                 )}
                 </>}
-
-
             </div>
+
+            {publishModalId && (
+                <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4'>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className='bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl'
+                    >
+                        <div className='flex items-center justify-between mb-4'>
+                            <h2 className='font-semibold'>Publish to Gallery</h2>
+                            <button onClick={() => { setPublishModalId(null); setPublishTags('') }} className='p-1.5 rounded-lg hover:bg-white/10 transition'><X size={14} /></button>
+                        </div>
+                        <p className='text-xs text-zinc-400 mb-4'>Your site will appear in the Community Gallery. Others can view and upvote it.</p>
+                        <label className='text-xs font-medium text-zinc-300 block mb-1.5'>Tags <span className='text-zinc-600'>(comma-separated, e.g. landing page, portfolio)</span></label>
+                        <input
+                            value={publishTags}
+                            onChange={e => setPublishTags(e.target.value)}
+                            placeholder='landing page, portfolio, saas…'
+                            className='w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/10 outline-none text-sm focus:ring-2 focus:ring-white/20 mb-5'
+                        />
+                        <div className='flex gap-3'>
+                            <button
+                                onClick={() => { setPublishModalId(null); setPublishTags('') }}
+                                className='flex-1 py-2.5 rounded-xl text-sm font-medium bg-white/5 border border-white/10 hover:bg-white/10 transition'
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handlePublish(publishModalId)}
+                                disabled={publishLoading}
+                                className='flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white text-black hover:bg-zinc-200 transition disabled:opacity-50'
+                            >
+                                {publishLoading ? 'Publishing…' : 'Publish'}
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     )
 }

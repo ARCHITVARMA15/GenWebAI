@@ -51,11 +51,33 @@ const websiteSchema = new mongoose.Schema({
    modelUsed:{
     type:String,
     default:"gemini"
-   }
+   },
+   isPublished:{
+    type:Boolean,
+    default:false
+   },
+   publishedAt:{
+    type:Date
+   },
+   upvotes:{
+    type:Number,
+    default:0
+   },
+   upvotedBy:[{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"User"
+   }],
+   previewImageUrl:{
+    type:String
+   },
+   tags:[String]
 
 
 
 },{timestamps:true});
+
+websiteSchema.index({ isPublished: 1, upvotes: -1 })
+websiteSchema.index({ isPublished: 1, publishedAt: -1 })
 
 const Website = mongoose.model("Website" , websiteSchema)
 export default Website

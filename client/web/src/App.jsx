@@ -10,7 +10,8 @@ import Generate from './pages/Generate';
 import Editor from './pages/Editor';
 import Pricing from './pages/Pricing';
 import LiveSite from './pages/LiveSite';
-import Toast from './components/Toast';
+import Toast from './components/Toast'
+import GalleryPage from './pages/GalleryPage';
 
 export const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
@@ -45,6 +46,7 @@ function App(){
         <Route path="/editor/:id" element={userData ? <Editor /> : <Home />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/site/:id" element={<LiveSite />} />
+        <Route path="/gallery" element={<GalleryPage />} />
       </Routes>
     </BrowserRouter>
   )

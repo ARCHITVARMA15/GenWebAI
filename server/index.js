@@ -12,6 +12,7 @@ import websiteRouter from "./routes/website.routes.js"
 import paymentRouter from "./routes/payment.routes.js"
 import analyticsRouter from "./routes/analytics.routes.js"
 import aiModelsRouter from "./routes/aiModels.routes.js"
+import galleryRouter from "./routes/gallery.routes.js"
 import { globalLimiter, authLimiter, paymentLimiter } from "./middlewares/rateLimiter.js"
 
 const app = express()
@@ -41,6 +42,7 @@ app.use("/api/website", websiteRouter)
 app.use("/api/payment", paymentLimiter, paymentRouter)
 app.use("/api/analytics", analyticsRouter)
 app.use("/api/ai/models", aiModelsRouter)
+app.use("/api/gallery", galleryRouter)
 
 app.listen(port, () => {
     console.log("server started")
