@@ -10,6 +10,7 @@ import mongoSanitize from "express-mongo-sanitize"
 import userRouter from "./routes/user.routes.js"
 import websiteRouter from "./routes/website.routes.js"
 import paymentRouter from "./routes/payment.routes.js"
+import analyticsRouter from "./routes/analytics.routes.js"
 import { globalLimiter, authLimiter, paymentLimiter } from "./middlewares/rateLimiter.js"
 
 const app = express()
@@ -37,6 +38,7 @@ app.use("/api/auth", authLimiter, authRouter)
 app.use("/api/user", userRouter)
 app.use("/api/website", websiteRouter)
 app.use("/api/payment", paymentLimiter, paymentRouter)
+app.use("/api/analytics", analyticsRouter)
 
 app.listen(port, () => {
     console.log("server started")
