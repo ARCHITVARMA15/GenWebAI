@@ -4,6 +4,22 @@ import extractJson  from "../utils/extractJson.js"
 import User from "../models/user.model.js"
 import { saveVersion } from "../utils/saveVersion.js"
 
+const generateTimestamps = new Map()
+
+const trackGenerate = (userId) => {
+    const now = Date.now()
+    const recent = (generateTimestamps.get(userId) || []).filter(t => now - t < 60000)
+    if (recent.length >= 3) {
+        console.warn(`[ABUSE ALERT] User ${userId} rapid-generating at ${new Date().toISOString()}`)
+    }
+    recent.push(now)
+    generateTimestamps.set(userId, recent)
+    setTimeout(() => {
+        const current = generateTimestamps.get(userId) || []
+        generateTimestamps.set(userId, current.filter(t => Date.now() - t < 60000))
+    }, 60000)
+}
+
 const masterPrompt = `
 YOU ARE A PRINCIPAL FRONTEND ARCHITECT
 AND A SENIOR UI/UX ENGINEER
@@ -164,6 +180,8 @@ export const generateWebsite = async (req, res) => {
       if(!user){
         return res.status(400).json({message:"user not found"})
       }
+
+      trackGenerate(req.user._id.toString())
 
       if(user.credits<50){
         return res.status(400).json({message:"not enough credits to generate a website"}) 
@@ -398,6 +416,8 @@ export const generateWebsiteStream = async (req, res) => {
         const user = await User.findById(req.user._id)
         if (!user) { send({ error: 'user not found' }); return }
         if (user.credits < 50) { send({ error: 'not enough credits to generate a website' }); return }
+
+        trackGenerate(req.user._id.toString())
 
         const finalPrompt = masterPrompt.replace('{USER_PROMPT}', prompt)
         const streamBody = await generateResponseStream(finalPrompt)

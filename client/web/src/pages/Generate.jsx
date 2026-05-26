@@ -131,6 +131,15 @@ function Generate() {
                 signal: controller.signal,
             })
 
+            if (response.status === 429) {
+                const data = await response.json().catch(() => ({}))
+                const retryAfter = data.retryAfter || 60
+                const message = data.message || "Too many requests. Please wait before trying again."
+                window.dispatchEvent(new CustomEvent('show-toast', { detail: { message, retryAfter } }))
+                setLoading(false)
+                return
+            }
+
             const reader = response.body.getReader()
             const decoder = new TextDecoder()
             let buffer = ''
