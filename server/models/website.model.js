@@ -71,6 +71,16 @@ const websiteSchema = new mongoose.Schema({
     type:String
    },
    tags:[String],
+   isBranded:{
+    type:Boolean,
+    default:false
+   },
+   brandPrimaryColor:{
+    type:String
+   },
+   brandLogoSvg:{
+    type:String
+   },
    sourceType:{
     type:String,
     enum:["url-clone","image-clone"],

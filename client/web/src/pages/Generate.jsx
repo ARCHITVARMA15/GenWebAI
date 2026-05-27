@@ -86,12 +86,13 @@
 // export default Generate
 
 
-import { ArrowLeft, Lock, X, Zap } from 'lucide-react'
+import { ArrowLeft, Lock, X, Zap, Sparkles } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from "motion/react"
 import axios from 'axios'
 import { serverUrl } from '../App'
+import BrandKitGenerator from '../components/BrandKitGenerator'
 
 const PHASES = [
     "Analyzing your idea…",
@@ -103,6 +104,8 @@ const PHASES = [
 
 function Generate() {
     const navigate = useNavigate()
+    const location = useLocation()
+    const [mode, setMode] = useState(location.state?.mode || 'quick')
     const [prompt, setPrompt] = useState("")
     const [loading, setLoading] = useState(false)
     const [progress, setProgress] = useState(0)
@@ -217,10 +220,26 @@ function Generate() {
                         <button className='p-2 rounded-lg hover:bg-white/10 transition' onClick={() => navigate("/")}><ArrowLeft size={16} /></button>
                         <h1 className='text-lg font-semibold'>Genweb<span className='text-zinc-400'>.ai</span></h1>
                     </div>
+                    <div className='flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl p-1'>
+                        <button
+                            onClick={() => setMode('quick')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${mode === 'quick' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
+                        >Quick Mode</button>
+                        <button
+                            onClick={() => setMode('brand')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${mode === 'brand' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-white'}`}
+                        >
+                            <Sparkles size={11} /> Brand Mode
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${mode === 'brand' ? 'bg-white/20 text-white' : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'}`}>Premium</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div className='max-w-6xl mx-auto px-6 py-16'>
+                {mode === 'brand' ? (
+                    <BrandKitGenerator />
+                ) : (<>
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
                     <h1 className='text-4xl md:text-5xl font-bold mb-5 leading-tight'>
                         Build Websites with
@@ -346,6 +365,8 @@ function Generate() {
                         </motion.button>
                     </motion.div>
                 )}
+                </>
+            )}
             </div>
         </div>
     )

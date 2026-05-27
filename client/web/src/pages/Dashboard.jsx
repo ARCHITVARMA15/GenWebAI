@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, BarChart2, Globe, LayoutGrid, Rocket, Share2, X, ScanEye } from 'lucide-react'
+import { ArrowLeft, Check, BarChart2, Globe, LayoutGrid, Rocket, Share2, X, ScanEye, Sparkles } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { motion } from "motion/react"
 import { useSelector } from 'react-redux'
@@ -105,6 +105,9 @@ function Dashboard() {
                         <button className='flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-sm font-medium hover:bg-white/15 transition' onClick={() => navigate("/clone")}>
                             <ScanEye size={14} className='text-violet-400' /> Clone a Site
                         </button>
+                        <button className='flex items-center gap-1.5 px-3 py-2 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm font-medium text-purple-300 hover:bg-purple-500/20 transition' onClick={() => navigate("/generate", { state: { mode: 'brand' } })}>
+                            <Sparkles size={14} /> Brand Kit
+                        </button>
                         <button className='px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:scale-105 transition' onClick={() => navigate("/generate")}>
                             + New Website
                         </button>
@@ -153,6 +156,21 @@ function Dashboard() {
                                 <p className='text-xs text-zinc-500 mt-1'>Paste URL or upload screenshot</p>
                             </div>
                         </motion.div>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            whileHover={{ y: -6 }}
+                            onClick={() => navigate('/generate', { state: { mode: 'brand' } })}
+                            className="rounded-2xl border border-dashed border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 hover:border-purple-500/60 transition cursor-pointer flex flex-col items-center justify-center gap-3 min-h-[220px] p-6"
+                        >
+                            <div className='w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center'>
+                                <Sparkles size={22} className='text-purple-400' />
+                            </div>
+                            <div className='text-center'>
+                                <p className='font-semibold text-sm'>Generate Brand Kit</p>
+                                <p className='text-xs text-zinc-500 mt-1'>Logo · colors · fonts · full site</p>
+                            </div>
+                        </motion.div>
                         {websites.map((w, i) => {
 
                             const copied = copiedId === w._id
@@ -169,10 +187,23 @@ function Dashboard() {
                                 <div className='relative h-40 bg-black cursor-pointer'  onClick={()=>navigate(`/editor/${w._id}`)}>
                                     <iframe srcDoc={w.latestCode} className='absolute inset-0 w-[140%] h-[140%] scale-[0.72] origin-top-left pointer-events-none bg-white' />
                                     <div className='absolute inset-0 bg-black/30' />
+                                    {w.isBranded && w.brandLogoSvg && (
+                                        <div className='absolute top-2 right-2 w-8 h-8 rounded-lg bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center p-1 overflow-hidden'
+                                            dangerouslySetInnerHTML={{ __html: w.brandLogoSvg }}
+                                        />
+                                    )}
                                 </div>
 
                                 <div className='p-5 flex flex-col gap-4 flex-1'>
-                                    <h3 className='text-base font-semibold line-clamp-2'>{w.title}</h3>
+                                    <div className='flex items-start gap-2'>
+                                        <h3 className='text-base font-semibold line-clamp-2 flex-1'>{w.title}</h3>
+                                        {w.isBranded && (
+                                            <span className='flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/15 border border-purple-500/30 text-purple-400'>
+                                                <span className='w-1.5 h-1.5 rounded-full' style={{ backgroundColor: w.brandPrimaryColor || '#a855f7' }} />
+                                                Brand
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className='text-xs text-zinc-400'>Last Updated {""}
                                         {new Date(w.updatedAt).toLocaleDateString()}
                                     </p>

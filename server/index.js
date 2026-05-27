@@ -14,6 +14,7 @@ import analyticsRouter from "./routes/analytics.routes.js"
 import aiModelsRouter from "./routes/aiModels.routes.js"
 import galleryRouter from "./routes/gallery.routes.js"
 import cloneRouter from "./routes/clone.routes.js"
+import brandRouter from "./routes/brand.routes.js"
 import { globalLimiter, authLimiter, paymentLimiter } from "./middlewares/rateLimiter.js"
 
 const app = express()
@@ -45,6 +46,7 @@ app.use("/api/analytics", analyticsRouter)
 app.use("/api/ai/models", aiModelsRouter)
 app.use("/api/gallery", galleryRouter)
 app.use("/api/clone", cloneRouter)
+app.use("/api/brand", brandRouter)
 
 app.listen(port, () => {
     console.log("server started")
