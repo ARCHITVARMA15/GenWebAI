@@ -6,5 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   envDir: '../',
   plugins: [react(),tailwindcss()],
-  
+  optimizeDeps: {
+    include: ['recharts'],
+  },
 })
