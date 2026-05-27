@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, BarChart2, Globe, LayoutGrid, Rocket, Share2, X } from 'lucide-react'
+import { ArrowLeft, Check, BarChart2, Globe, LayoutGrid, Rocket, Share2, X, ScanEye } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { motion } from "motion/react"
 import { useSelector } from 'react-redux'
@@ -101,9 +101,14 @@ function Dashboard() {
                             </button>
                         </div>
                     </div>
-                    <button className='px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:scale-105 transition' onClick={() => navigate("/generate")}>
-                        + New Website
-                    </button>
+                    <div className='flex items-center gap-2'>
+                        <button className='flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-sm font-medium hover:bg-white/15 transition' onClick={() => navigate("/clone")}>
+                            <ScanEye size={14} className='text-violet-400' /> Clone a Site
+                        </button>
+                        <button className='px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:scale-105 transition' onClick={() => navigate("/generate")}>
+                            + New Website
+                        </button>
+                    </div>
                 </div>
             </div>
             <div className='max-w-7xl mx-auto px-6 py-10'>
@@ -133,6 +138,21 @@ function Dashboard() {
 
                 {!loading && !error && websites?.length > 0 && (
                     <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8'>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            whileHover={{ y: -6 }}
+                            onClick={() => navigate('/clone')}
+                            className="rounded-2xl border border-dashed border-violet-500/40 bg-violet-500/5 hover:bg-violet-500/10 hover:border-violet-500/60 transition cursor-pointer flex flex-col items-center justify-center gap-3 min-h-[220px] p-6"
+                        >
+                            <div className='w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center'>
+                                <ScanEye size={22} className='text-violet-400' />
+                            </div>
+                            <div className='text-center'>
+                                <p className='font-semibold text-sm'>Clone a Website</p>
+                                <p className='text-xs text-zinc-500 mt-1'>Paste URL or upload screenshot</p>
+                            </div>
+                        </motion.div>
                         {websites.map((w, i) => {
 
                             const copied = copiedId === w._id

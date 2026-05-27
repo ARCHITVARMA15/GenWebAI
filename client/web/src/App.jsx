@@ -12,6 +12,7 @@ import Pricing from './pages/Pricing';
 import LiveSite from './pages/LiveSite';
 import Toast from './components/Toast'
 import GalleryPage from './pages/GalleryPage';
+import CloneWebsite from './components/CloneWebsite';
 
 export const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
@@ -47,6 +48,7 @@ function App(){
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/site/:id" element={<LiveSite />} />
         <Route path="/gallery" element={<GalleryPage />} />
+        <Route path="/clone" element={userData ? <CloneWebsite /> : <Home />} />
       </Routes>
     </BrowserRouter>
   )

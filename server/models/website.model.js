@@ -70,7 +70,14 @@ const websiteSchema = new mongoose.Schema({
    previewImageUrl:{
     type:String
    },
-   tags:[String]
+   tags:[String],
+   sourceType:{
+    type:String,
+    enum:["url-clone","image-clone"],
+   },
+   sourceUrl:{
+    type:String
+   }
 
 
 
