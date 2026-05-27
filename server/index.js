@@ -6,7 +6,6 @@ import authRouter from "./routes/auth.routes.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import helmet from "helmet"
-import mongoSanitize from "express-mongo-sanitize"
 import userRouter from "./routes/user.routes.js"
 import websiteRouter from "./routes/website.routes.js"
 import paymentRouter from "./routes/payment.routes.js"
@@ -15,6 +14,7 @@ import aiModelsRouter from "./routes/aiModels.routes.js"
 import galleryRouter from "./routes/gallery.routes.js"
 import cloneRouter from "./routes/clone.routes.js"
 import brandRouter from "./routes/brand.routes.js"
+import uploadRouter from "./routes/upload.routes.js"
 import { globalLimiter, authLimiter, paymentLimiter } from "./middlewares/rateLimiter.js"
 
 const app = express()
@@ -26,14 +26,13 @@ const allowedOrigins = [
     ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
 ]
 
-app.use(helmet())
+app.use(helmet({ crossOriginOpenerPolicy: false }))
 app.use(cors({
     origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }))
-app.use(mongoSanitize())
 app.use(globalLimiter)
 app.use(express.json({ limit: "10mb" }))
 app.use(cookieParser())
@@ -47,6 +46,14 @@ app.use("/api/ai/models", aiModelsRouter)
 app.use("/api/gallery", galleryRouter)
 app.use("/api/clone", cloneRouter)
 app.use("/api/brand", brandRouter)
+app.use("/api/upload", uploadRouter)
+
+app.use((err, req, res, next) => {
+    console.error(`[ERROR] ${req.method} ${req.path}:`, err.message, '\n', err.stack)
+    if (!res.headersSent) {
+        res.status(500).json({ message: err.message || 'Internal server error' })
+    }
+})
 
 app.listen(port, () => {
     console.log("server started")

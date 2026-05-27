@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { AnimatePresence, motion } from "motion/react"
 import { auth, provider } from '../firebase'
-import { signInWithPopup } from 'firebase/auth'
+import { signInWithPopup, signInWithRedirect } from 'firebase/auth'
 import axios from 'axios'
 import { serverUrl } from '../config'
 import { useDispatch } from 'react-redux'
@@ -10,19 +10,35 @@ import { setUserData } from '../redux/userSlice'
 
 function LoginModal({ open, onClose }) {
     const dispatch = useDispatch()
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
 
-    const handleGoogleAuth =async()=>{
-        try{
+    const handleGoogleAuth = async () => {
+        setLoading(true)
+        setError('')
+        try {
             const result = await signInWithPopup(auth, provider)
-            const {data} = await axios.post(`${serverUrl}/api/auth/google`,{
-                name : result.user.displayName,
+            const { data } = await axios.post(`${serverUrl}/api/auth/google`, {
+                name: result.user.displayName,
                 email: result.user.email,
                 avatar: result.user.photoURL
-            },{withCredentials:true})
+            }, { withCredentials: true })
             dispatch(setUserData(data?.user ?? data ?? null))
             onClose()
-        }catch(error){
-            console.error(error)
+        } catch (error) {
+            console.error('Auth error:', error)
+            if (error?.code === 'auth/popup-blocked' || error?.code === 'auth/cancelled-popup-request') {
+                setError('Popup was blocked. Redirecting to Google...')
+                await signInWithRedirect(auth, provider)
+            } else if (error?.code === 'auth/popup-closed-by-user') {
+                setError('Sign-in cancelled. Please try again.')
+            } else if (error?.code === 'auth/unauthorized-domain') {
+                setError('Domain not authorised in Firebase. Add localhost to Firebase Console → Auth → Settings → Authorised domains.')
+            } else {
+                setError(error?.message || 'Sign-in failed. Please try again.')
+            }
+        } finally {
+            setLoading(false)
         }
     }
     return (
@@ -75,18 +91,25 @@ function LoginModal({ open, onClose }) {
                             </h2>
 
                              <motion.button
-                                    whileHover={{ scale: 1.04 }}
-                                    whileTap={{ scale: 0.96 }}
-                                     onClick={handleGoogleAuth}
-                                    className="group relative w-full h-13 rounded-xl bg-white text-black font-semibold shadow-xl overflow-hidden"
+                                    whileHover={{ scale: loading ? 1 : 1.04 }}
+                                    whileTap={{ scale: loading ? 1 : 0.96 }}
+                                    onClick={handleGoogleAuth}
+                                    disabled={loading}
+                                    className="group relative w-full h-13 rounded-xl bg-white text-black font-semibold shadow-xl overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
-
                                     <div className='relative flex items-center justify-center gap-3'>
-                                        <img src="https://www.svgrepo.com/show/303108/google-icon-logo.svg" alt="" className='h-5 w-5' />
-                                        Continue with Google
+                                        {loading ? (
+                                            <svg className='animate-spin h-5 w-5' viewBox='0 0 24 24' fill='none'><circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'/><path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8v8z'/></svg>
+                                        ) : (
+                                            <img src="https://www.svgrepo.com/show/303108/google-icon-logo.svg" alt="" className='h-5 w-5' />
+                                        )}
+                                        {loading ? 'Signing in…' : 'Continue with Google'}
                                     </div>
-
                                 </motion.button>
+
+                                {error && (
+                                    <p className='mt-3 text-xs text-red-400 text-center leading-relaxed px-2'>{error}</p>
+                                )}
 
 
                                 <div className='flex items-center gap-4 my-10'>

@@ -1,7 +1,5 @@
 const extractJson = async (text) => {
-    if (!text) {
-        return null
-    }
+    if (!text) return null
 
     const cleaned = text
         .replace(/```json/gi, "")
@@ -16,9 +14,25 @@ const extractJson = async (text) => {
     }
 
     const jsonString = cleaned.slice(firstBrace, closeBrace + 1)
-    return JSON.parse(jsonString)
 
+    // Attempt 1: direct parse
+    try {
+        return JSON.parse(jsonString)
+    } catch (_) {}
 
+    // Attempt 2: fix backslashes not part of valid JSON escape sequences
+    try {
+        const fixed = jsonString.replace(/\\(?!["\\/bfnrtu])/g, '\\\\')
+        return JSON.parse(fixed)
+    } catch (_) {}
+
+    // Attempt 3: strip all lone backslashes
+    try {
+        const stripped = jsonString.replace(/\\(?!["\\/bfnrtu])/g, '')
+        return JSON.parse(stripped)
+    } catch (_) {}
+
+    return null
 }
 
-export default extractJson 
+export default extractJson

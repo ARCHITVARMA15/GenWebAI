@@ -8,7 +8,7 @@ import User from '../models/user.model.js'
 
 const router = express.Router()
 
-const BRAND_CREDITS = 5
+const BRAND_CREDITS = 15
 
 router.post('/generate', isAuth, async (req, res) => {
     try {

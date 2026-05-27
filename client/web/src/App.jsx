@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './index.css';
 import axios from 'axios';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { getRedirectResult } from 'firebase/auth';
+import { auth } from './firebase';
+import { useDispatch } from 'react-redux';
 import Home from './pages/Home';
 import useGetCurrentUser from './hooks/useGetCurrentUser';
 import { useSelector } from 'react-redux';
@@ -11,6 +14,7 @@ import Editor from './pages/Editor';
 import Pricing from './pages/Pricing';
 import LiveSite from './pages/LiveSite';
 import Toast from './components/Toast'
+import { setUserData } from './redux/userSlice'
 import GalleryPage from './pages/GalleryPage';
 import CloneWebsite from './components/CloneWebsite';
 
@@ -31,8 +35,26 @@ axios.interceptors.response.use(
 function App(){
 
   useGetCurrentUser()
-  //dashbard and generate page should only be accessible if user is logged in. we can check that using userData from redux store
+  const dispatch = useDispatch()
   const {userData} = useSelector(state=>state.user)
+
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth)
+        if (!result?.user) return
+        const { data } = await axios.post(
+          `${serverUrl}/api/auth/google`,
+          { name: result.user.displayName, email: result.user.email, avatar: result.user.photoURL },
+          { withCredentials: true }
+        )
+        dispatch(setUserData(data?.user ?? data ?? null))
+      } catch (err) {
+        console.error('Redirect auth error:', err)
+      }
+    }
+    handleRedirectResult()
+  }, [])
   return(
     <BrowserRouter>
       <Toast />

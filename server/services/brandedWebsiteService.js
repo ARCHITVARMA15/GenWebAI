@@ -1,5 +1,5 @@
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const MODEL = 'openai/gpt-4o'
+const MODEL = 'openrouter/auto'
 
 export const generateBrandedWebsite = async (userPrompt, brandKit) => {
     const systemMsg = `You are an expert frontend developer who creates stunning, conversion-focused websites.`

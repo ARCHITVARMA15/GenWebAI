@@ -13,7 +13,8 @@ aiModelsRouter.get('/', isAuth, (req, res) => {
         description: m.description,
         badge: m.badge,
         creditsPerGeneration: m.creditsPerGeneration,
-        isAvailable: m.available.includes(userPlan)
+        comingSoon: m.comingSoon || false,
+        isAvailable: !m.comingSoon && m.available.includes(userPlan)
     }))
     return res.json({ success: true, data: result })
 })

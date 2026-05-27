@@ -275,9 +275,11 @@ function Generate() {
                                             >
                                                 <div className='flex items-start justify-between gap-2 mb-1.5'>
                                                     <span className='text-sm font-semibold'>{m.label}</span>
-                                                    {!m.isAvailable
-                                                        ? <span className='flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700'><Lock size={9} />Pro</span>
-                                                        : m.badge && <span className='text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-300'>{m.badge}</span>
+                                                    {m.comingSoon
+                                                        ? <span className='flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20'>Coming Soon</span>
+                                                        : !m.isAvailable
+                                                            ? <span className='flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700'><Lock size={9} />Pro</span>
+                                                            : m.badge && <span className='text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-300'>{m.badge}</span>
                                                     }
                                                 </div>
                                                 <p className='text-xs text-zinc-400 mb-2'>{m.description}</p>

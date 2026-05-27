@@ -6,6 +6,8 @@ import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { serverUrl } from '../App'
 import { setUserData } from '../redux/userSlice'
+import LoginModal from '../components/LoginModal'
+import useGetCurrentUser from '../hooks/useGetCurrentUser'
 
 const PACKS = [
     {
@@ -48,15 +50,17 @@ const loadRazorpay = () =>
     })
 
 function Pricing() {
+    useGetCurrentUser()
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const { userData } = useSelector(state => state.user)
     const [loadingPack, setLoadingPack] = useState(null)
     const [successPack, setSuccessPack] = useState(null)
+    const [openLogin, setOpenLogin] = useState(false)
 
     const handleBuy = async (pack) => {
         if (!userData) {
-            navigate("/")
+            setOpenLogin(true)
             return
         }
         setLoadingPack(pack.id)
@@ -124,6 +128,7 @@ function Pricing() {
     }
 
     return (
+        <>
         <div className='min-h-screen bg-[#040404] text-white'>
             <div className='sticky top-0 z-40 backdrop-blur-xl bg-black/50 border-b border-white/10'>
                 <div className='max-w-7xl mx-auto px-6 h-16 flex items-center justify-between'>
@@ -226,6 +231,9 @@ function Pricing() {
                 </p>
             </div>
         </div>
+
+        {openLogin && <LoginModal open={openLogin} onClose={() => setOpenLogin(false)} />}
+        </>
     )
 }
 

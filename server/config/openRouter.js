@@ -1,37 +1,39 @@
 const openRouterUrl = "https://openrouter.ai/api/v1/chat/completions";
 
-const defaultModel = "google/gemini-flash-1.5";
+const defaultModel = "openrouter/auto";
 
 export const generateResponse = async (prompt, modelId = defaultModel) => {
-    const res = await fetch(openRouterUrl, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 45000)
 
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            model: modelId,
-            messages: [
+    try {
+        const res = await fetch(openRouterUrl, {
+            method: 'POST',
+            signal: controller.signal,
+            headers: {
+                Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: modelId,
+                messages: [
+                    { role: 'system', content: "You must return ONLY valid raw JSON." },
+                    { role: 'user', content: prompt },
+                ],
+                temperature: 0.2,
+                max_tokens: 16000
+            }),
+        })
 
-                {
-                    role: 'system', content: "You must return ONLY valid raw JSON."
-                },
-                {
-                    role: 'user',
-                    content: prompt,
-                },
-            ],
-            temperature:0.2
-        }),
-    });
-
-    if(!res.ok){
-        const error = await res.text()
-        throw new Error(`OpenRouter API error: ${error}`)
+        if (!res.ok) {
+            const error = await res.text()
+            throw new Error(`OpenRouter API error: ${error}`)
+        }
+        const data = await res.json()
+        return data.choices[0].message.content
+    } finally {
+        clearTimeout(timeout)
     }
-    const data = await res.json()
-    return data.choices[0].message.content
 }
 
 export const generateResponseStream = async (prompt, modelId = defaultModel) => {
@@ -48,6 +50,7 @@ export const generateResponseStream = async (prompt, modelId = defaultModel) => 
                 { role: 'user', content: prompt },
             ],
             temperature: 0.2,
+            max_tokens: 8192,
             stream: true
         }),
     })

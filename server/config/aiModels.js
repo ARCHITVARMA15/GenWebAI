@@ -1,10 +1,10 @@
 const aiModels = {
     gemini: {
-        label: "Gemini Flash 1.5",
-        modelId: "google/gemini-flash-1.5",
+        label: "Gemini 2.5 Flash",
+        modelId: "openrouter/auto",
         description: "Fast and free tier compatible",
         badge: "Fastest",
-        creditsPerGeneration: 50,
+        creditsPerGeneration: 30,
         available: ["free", "pro", "enterprise"]
     },
     claude: {
@@ -12,16 +12,18 @@ const aiModels = {
         modelId: "anthropic/claude-3.5-sonnet",
         description: "Best for clean, modern designs",
         badge: "Best Design",
-        creditsPerGeneration: 75,
-        available: ["pro", "enterprise"]
+        creditsPerGeneration: 45,
+        available: ["pro", "enterprise"],
+        comingSoon: true
     },
     gpt4o: {
         label: "GPT-4o",
         modelId: "openai/gpt-4o",
         description: "Best overall quality",
         badge: "Best Quality",
-        creditsPerGeneration: 100,
-        available: ["pro", "enterprise"]
+        creditsPerGeneration: 60,
+        available: ["pro", "enterprise"],
+        comingSoon: true
     }
 }
 

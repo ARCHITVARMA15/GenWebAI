@@ -285,43 +285,47 @@ export const changes = async(req, res)=>{
     if(!user){
       return res.status(400).json({message:"user not found"})
     }
-    if(user.credits < 25){
+    if(user.credits < 10){
       return res.status(400).json({message:"you do not have enough credits to generate a website"})
 
     }
 
-            const updatePrompt = `
-UPDATE THIS HTML WEBSITE.
+            const trimmedCode = website.latestCode
+                .replace(/\n\s*\n/g, '\n')
+                .replace(/  +/g, ' ')
+                .trim()
+
+            const updatePrompt = `You are updating an HTML website.
 
 CURRENT CODE:
-${website.latestCode}
+${trimmedCode}
 
-USER REQUEST:
-${prompt}
+USER REQUEST: ${prompt}
 
-RETURN RAW JSON ONLY:
-{
-  "message": "Short confirmation",
-  "code": "<UPDATED FULL HTML>"
-}
-`
+Reply using EXACTLY this format — no JSON, no markdown:
+<MESSAGE>One sentence confirmation</MESSAGE>
+<CODE>
+<!DOCTYPE html>
+...complete updated HTML file here...
+</CODE>`
 
              let raw = ""
-             let parsed = null 
-             for(let i =0; i <2 && !parsed; i++){
-              raw = await generateResponse(updatePrompt)
-              parsed = await extractJson(raw)
-
-              if(!parsed){
-                raw = await generateResponse(updatePrompt + "\n\nRETURN ONLY RAW JSON")
-                parsed = await extractJson(raw)
-              }
+             for(let i = 0; i < 2; i++){
+                raw = await generateResponse(updatePrompt)
+                if(raw && raw.includes('<CODE>')) break
              }
 
-             if (!parsed.code) {
-            console.log("ai returned invalid response", raw)
+             const messageMatch = raw.match(/<MESSAGE>([\s\S]*?)<\/MESSAGE>/)
+             const codeMatch = raw.match(/<CODE>([\s\S]*?)<\/CODE>/)
+             const parsedMessage = messageMatch?.[1]?.trim() || 'Website updated'
+             const parsedCode = codeMatch?.[1]?.trim()
+
+             if (!parsedCode) {
+            console.log("ai returned invalid response", raw?.slice(0, 500))
             return res.status(400).json({ message: "ai returned invalid response" })
         }
+
+        const parsed = { message: parsedMessage, code: parsedCode }
             
 
         website.conversation.push(
@@ -334,7 +338,7 @@ RETURN RAW JSON ONLY:
         website.latestCode = parsed.code 
 
         await website.save()
-        user.credits = user.credits -25
+        user.credits = user.credits - 10
         await user.save()
 
         return res.status(200).json({

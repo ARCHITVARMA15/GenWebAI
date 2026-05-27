@@ -4,10 +4,11 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { serverUrl } from '../App'
 import { useState } from 'react'
-import { ArrowLeft, Code, Code2, History, MessageCircle, MessageSquare, Monitor, Rocket, Send, X } from 'lucide-react'
+import { ArrowLeft, Code, Code2, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, X } from 'lucide-react'
 import { useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import VersionHistoryPanel from '../components/VersionHistoryPanel'
+import AssetManager from '../components/AssetManager'
 
 import Editor from '@monaco-editor/react';
 function WebsiteEditor() {
@@ -24,6 +25,8 @@ function WebsiteEditor() {
     const [showFullPreview, setShowFullPreview] = useState(false)
     const [showChat, setShowChat] = useState(false)
     const [showHistory, setShowHistory] = useState(false)
+    const [showAssets, setShowAssets] = useState(false)
+    const [updateError, setUpdateError] = useState('')
     const thinkingSteps = [
         "Understanding your request…",
         "Planning layout changes…",
@@ -38,13 +41,14 @@ function WebsiteEditor() {
         setPrompt("")
         setMessages((m) => [...m, { role: "user", content: prompt }])
         try {
+            setUpdateError('')
             const result = await axios.post(`${serverUrl}/api/website/update/${id}`, { prompt: text }, { withCredentials: true })
-            console.log(result)
             setUpdateLoading(false)
             setMessages((m) => [...m, { role: "ai", content: result.data.message }])
             setCode(result.data.code)
         } catch (error) {
             setUpdateLoading(false)
+            setUpdateError(error?.response?.data?.message || 'Update failed. Please try again.')
             console.log(error)
         }
     }
@@ -148,6 +152,7 @@ function WebsiteEditor() {
 
                     </div>
                     <div className='p-3 border-t border-white/10'>
+                        {updateError && <p className='text-xs text-red-400 mb-2 px-1'>{updateError}</p>}
                         <div className='flex gap-2'>
                             <input placeholder='Describe Changes...' className='flex-1 resize-none rounded-2xl px-4 py-3 bg-white/5 border border-white/10 text-sm outline-none' onChange={(e) => setPrompt(e.target.value)} value={prompt} />
                             <button className='px-4 py-3 rounded-2xl bg-white text-black' disabled={updateLoading} onClick={handleUpdate}><Send size={14} /></button>
@@ -168,6 +173,7 @@ function WebsiteEditor() {
                         <button className='p-2 lg:hidden' onClick={() => setShowChat(true)}><MessageSquare size={18} /></button>
 
                         <button className='p-2' onClick={() => setShowHistory((v) => !v)} title="Version History"><History size={18} /></button>
+                        <button className='p-2' onClick={() => setShowAssets((v) => !v)} title="Image Assets"><ImageIcon size={18} /></button>
                         <button className='p-2' onClick={() => setShowCode(true)}><Code2 size={18} /></button>
                         <button className='p-2' onClick={() => setShowFullPreview(true)}><Monitor size={18} /></button>
                     </div>
@@ -252,6 +258,12 @@ function WebsiteEditor() {
                         />
 
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {showAssets && (
+                    <AssetManager onClose={() => setShowAssets(false)} />
                 )}
             </AnimatePresence>
 

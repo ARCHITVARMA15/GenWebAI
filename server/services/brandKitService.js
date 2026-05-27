@@ -1,7 +1,7 @@
 import extractJson from '../utils/extractJson.js'
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const MODEL = 'openai/gpt-4o'
+const MODEL = 'openrouter/auto'
 
 const buildGoogleFontsUrl = (headingFont, bodyFont) => {
     const h = headingFont.replace(/ /g, '+')
