@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, BarChart2, Globe, LayoutGrid, Rocket, Share2, X, ScanEye, Sparkles } from 'lucide-react'
+import { ArrowLeft, Check, BarChart2, Globe, LayoutGrid, Rocket, Search, Share2, Trash2, X, ScanEye, Sparkles } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { motion } from "motion/react"
 import { useSelector } from 'react-redux'
@@ -17,6 +17,8 @@ function Dashboard() {
     const [publishModalId, setPublishModalId] = useState(null)
     const [publishTags, setPublishTags] = useState('')
     const [publishLoading, setPublishLoading] = useState(false)
+    const [search, setSearch] = useState('')
+    const [deletingId, setDeletingId] = useState(null)
     const handleDeploy = async (id) => {
         try {
             const result = await axios.get(`${serverUrl}/api/website/deploy/${id}`, { withCredentials: true })
@@ -68,6 +70,16 @@ function Dashboard() {
             console.log(err)
         }
         setPublishLoading(false)
+    }
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Delete this website? This cannot be undone.')) return
+        setDeletingId(id)
+        try {
+            await axios.delete(`${serverUrl}/api/website/delete/${id}`, { withCredentials: true })
+            setWebsites(prev => prev.filter(w => w._id !== id))
+        } catch (err) { console.log(err) }
+        setDeletingId(null)
     }
 
     const handleUnpublish = async (id) => {
@@ -139,7 +151,12 @@ function Dashboard() {
                     <div className="mt-24 text-center text-zinc-400">You have no websites</div>
                 )}
 
-                {!loading && !error && websites?.length > 0 && (
+                {!loading && !error && websites?.length > 0 && (<>
+                    <div className='relative mb-6 max-w-sm'>
+                        <Search size={14} className='absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500' />
+                        <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Search websites…' className='w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm outline-none focus:ring-2 focus:ring-white/20 placeholder:text-zinc-600' />
+                    </div>
+                    {search && websites.filter(w => w.title?.toLowerCase().includes(search.toLowerCase())).length === 0 && <p className='text-zinc-500 text-sm mb-4'>No websites match "{search}"</p>}
                     <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8'>
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -171,7 +188,7 @@ function Dashboard() {
                                 <p className='text-xs text-zinc-500 mt-1'>Logo · colors · fonts · full site</p>
                             </div>
                         </motion.div>
-                        {websites.map((w, i) => {
+                        {websites.filter(w => w.title?.toLowerCase().includes(search.toLowerCase())).map((w, i) => {
 
                             const copied = copiedId === w._id
 
@@ -254,13 +271,14 @@ function Dashboard() {
                                         }
                                     </motion.button>)}
 
+                                    <button onClick={() => handleDelete(w._id)} disabled={deletingId === w._id} className='flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-red-500/20 text-red-400 hover:bg-red-500/10 transition disabled:opacity-50' title='Delete website'><Trash2 size={12} />{deletingId === w._id ? 'Deleting…' : 'Delete'}</button>
                                 </div>
 
                             </motion.div>
                         })}
 
                     </div>
-                )}
+                </>)}
                 </>}
             </div>
 

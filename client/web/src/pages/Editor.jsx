@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { serverUrl } from '../App'
 import { useState } from 'react'
-import { ArrowLeft, Code, Code2, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, Smartphone, X } from 'lucide-react'
+import { ArrowLeft, Code, Code2, Download, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, Smartphone, X } from 'lucide-react'
 import { useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import VersionHistoryPanel from '../components/VersionHistoryPanel'
@@ -52,6 +52,19 @@ function WebsiteEditor() {
             setUpdateError(error?.response?.data?.message || 'Update failed. Please try again.')
             console.log(error)
         }
+    }
+
+    const handleDownload = () => {
+        if (!code) return
+        const blob = new Blob([code], { type: 'text/html' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${(website?.title || 'website').slice(0, 40).replace(/[^a-z0-9]/gi, '-').toLowerCase()}.html`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
     }
 
     const handleDeploy = async () => {
@@ -173,6 +186,7 @@ function WebsiteEditor() {
                        
                         <button className='p-2 lg:hidden' onClick={() => setShowChat(true)}><MessageSquare size={18} /></button>
 
+                        <button className='p-2 text-zinc-400 hover:text-white transition' onClick={handleDownload} title="Download HTML"><Download size={18} /></button>
                         <button className='p-2' onClick={() => setShowHistory((v) => !v)} title="Version History"><History size={18} /></button>
                         <button className='p-2' onClick={() => setShowAssets((v) => !v)} title="Image Assets"><ImageIcon size={18} /></button>
                         <button

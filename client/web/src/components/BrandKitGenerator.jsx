@@ -373,6 +373,17 @@ function BrandKitGenerator() {
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-white/10 hover:bg-white/15 border border-white/10 transition">
                     <Palette size={14} /> Adjust Colors
                 </button>
+                <button onClick={() => {
+                    const blob = new Blob([adjustedHtml || htmlContent], { type: 'text/html' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `${(brandKit?.businessName || 'website').toLowerCase().replace(/\s+/g, '-')}.html`
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                }} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-white/10 hover:bg-white/15 border border-white/10 transition">
+                    <Download size={14} /> Download HTML
+                </button>
                 <button onClick={() => navigate('/dashboard')}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition ml-auto">
                     Save to Dashboard →

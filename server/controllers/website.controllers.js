@@ -354,6 +354,21 @@ Reply using EXACTLY this format — no JSON, no markdown:
   }
 }
 
+export const deleteWebsite = async(req, res)=>{
+  try{
+    const website = await Website.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id
+    })
+    if(!website){
+      return res.status(404).json({message:"website not found"})
+    }
+    return res.status(200).json({message:"website deleted"})
+  }catch(error){
+    return res.status(500).json({message:`delete website error ${error}`})
+  }
+}
+
 export const getAll = async(req, res)=>{
   try{
     const websites = await Website.find({user:req.user._id})
