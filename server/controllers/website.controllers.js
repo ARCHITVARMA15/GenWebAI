@@ -11,10 +11,17 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000'
 async function injectWidgetAndEmbed(websiteId, htmlCode) {
     try {
         const widgetScript = `\n<script src="${BACKEND_URL}/widget.js"></script>\n<script>window.addEventListener('load',function(){if(typeof SiteChat!=='undefined')SiteChat.init({websiteId:"${websiteId}",primaryColor:"#6366f1",apiBase:"${BACKEND_URL}"});});</script>`
-        const codeWithWidget = htmlCode.includes('</body>')
-            ? htmlCode.replace('</body>', widgetScript + '</body>')
-            : htmlCode + widgetScript
-        await Website.findByIdAndUpdate(websiteId, { latestCode: codeWithWidget })
+
+        // A/B tracking script — injected into every generated site.
+        // Assigns visitors deterministically to variant a/b, then fires visit + click events.
+        // Phase 2 note: replace DOM section with variant B HTML inside the 'ab_variant' listener below.
+        const abScript = `\n<script>(function(){try{var sid=localStorage.getItem('_sid')||Math.random().toString(36).slice(2);localStorage.setItem('_sid',sid);var wid="${websiteId}";var apiBase="${BACKEND_URL}";var hash=0;for(var i=0;i<sid.length;i++){hash=(hash<<5)-hash+sid.charCodeAt(i);hash|=0;}var variant=Math.abs(hash)%2===0?'a':'b';fetch(apiBase+'/api/track/visit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({websiteId:wid,sessionId:sid,variantServed:variant})}).catch(function(){});document.querySelectorAll('a[href],button').forEach(function(el){el.addEventListener('click',function(){fetch(apiBase+'/api/track/click',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({websiteId:wid,sessionId:sid,variantServed:variant})}).catch(function(){});});});/* Phase 2: swap variant B section via DOM — document.addEventListener('ab_variant',function(e){if(e.detail.variant==='b'){} }); */if(variant==='b'){document.dispatchEvent(new CustomEvent('ab_variant',{detail:{variant:'b'}}));}}catch(e){}})();</script>`
+
+        const injections = widgetScript + abScript
+        const codeWithAll = htmlCode.includes('</body>')
+            ? htmlCode.replace('</body>', injections + '</body>')
+            : htmlCode + injections
+        await Website.findByIdAndUpdate(websiteId, { latestCode: codeWithAll })
         await generateAndStoreEmbeddings(websiteId, htmlCode)
     } catch (err) {
         console.error('Post-generation tasks failed:', err.message)

@@ -18,6 +18,9 @@ import cloneRouter from "./routes/clone.routes.js"
 import brandRouter from "./routes/brand.routes.js"
 import uploadRouter from "./routes/upload.routes.js"
 import chatRouter from "./routes/chat.routes.js"
+import experimentsRouter from "./routes/experiments.js"
+import trackingRouter from "./routes/tracking.js"
+import { startExperimentCron } from "./jobs/experimentCron.js"
 import { globalLimiter, authLimiter, paymentLimiter } from "./middlewares/rateLimiter.js"
 
 const __filename = fileURLToPath(import.meta.url)
@@ -33,6 +36,7 @@ const allowedOrigins = [
 ]
 
 app.use('/api/chat', chatRouter)
+app.use('/api/track', trackingRouter)
 
 app.use(express.static(path.join(__dirname, 'public')))
 
@@ -57,6 +61,7 @@ app.use("/api/gallery", galleryRouter)
 app.use("/api/clone", cloneRouter)
 app.use("/api/brand", brandRouter)
 app.use("/api/upload", uploadRouter)
+app.use("/api/experiments", experimentsRouter)
 
 app.use((err, req, res, next) => {
     console.error(`[ERROR] ${req.method} ${req.path}:`, err.message, '\n', err.stack)
@@ -68,5 +73,6 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
     console.log("server started")
     connectDb()
+    startExperimentCron()
 })
 

@@ -4,12 +4,13 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { serverUrl } from '../App'
 import { useState } from 'react'
-import { ArrowLeft, Bot, Code, Code2, Download, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, Smartphone, X } from 'lucide-react'
+import { ArrowLeft, Bot, Code, Code2, Download, FlaskConical, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, Smartphone, X } from 'lucide-react'
 import { useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import VersionHistoryPanel from '../components/VersionHistoryPanel'
 import AssetManager from '../components/AssetManager'
 import ChatWidgetPanel from '../components/ChatWidgetPanel'
+import ExperimentPanel from '../components/ExperimentPanel'
 
 import Editor from '@monaco-editor/react';
 function WebsiteEditor() {
@@ -30,6 +31,7 @@ function WebsiteEditor() {
     const [updateError, setUpdateError] = useState('')
     const [mobileView, setMobileView] = useState(false)
     const [showWidget, setShowWidget] = useState(false)
+    const [showExperiment, setShowExperiment] = useState(false)
     const thinkingSteps = [
         "Understanding your request…",
         "Planning layout changes…",
@@ -190,6 +192,7 @@ function WebsiteEditor() {
 
                         <button className='p-2 text-zinc-400 hover:text-white transition' onClick={handleDownload} title="Download HTML"><Download size={18} /></button>
                         <button className={`p-2 rounded-lg transition ${showWidget ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white'}`} onClick={() => setShowWidget(v => !v)} title='Chat Widget'><Bot size={18} /></button>
+                        <button className={`p-2 rounded-lg transition ${showExperiment ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white'}`} onClick={() => setShowExperiment(v => !v)} title='A/B Testing'><FlaskConical size={18} /></button>
                         <button className='p-2' onClick={() => setShowHistory((v) => !v)} title="Version History"><History size={18} /></button>
                         <button className='p-2' onClick={() => setShowAssets((v) => !v)} title="Image Assets"><ImageIcon size={18} /></button>
                         <button
@@ -224,6 +227,19 @@ function WebsiteEditor() {
                         <button className='p-1.5 rounded-lg hover:bg-white/10' onClick={() => setShowWidget(false)}><X size={14} /></button>
                     </div>
                     <ChatWidgetPanel websiteId={website._id} websiteName={website.title} />
+                </aside>
+            )}
+
+            {showExperiment && website && (
+                <aside className='w-80 shrink-0 border-l border-white/10 bg-black/80 flex flex-col overflow-y-auto'>
+                    <div className='h-14 px-4 flex items-center justify-between border-b border-white/10 shrink-0'>
+                        <div className='flex items-center gap-2'>
+                            <FlaskConical size={14} className='text-indigo-400' />
+                            <span className='text-xs font-semibold text-zinc-400 uppercase tracking-widest'>A/B Testing</span>
+                        </div>
+                        <button className='p-1.5 rounded-lg hover:bg-white/10' onClick={() => setShowExperiment(false)}><X size={14} /></button>
+                    </div>
+                    <ExperimentPanel websiteId={website._id} />
                 </aside>
             )}
 
