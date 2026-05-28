@@ -11,7 +11,7 @@ chatRouter.use((req, res, next) => {
     next()
 })
 
-chatRouter.options('*', (req, res) => res.sendStatus(200))
+chatRouter.use((req, res, next) => { if (req.method === 'OPTIONS') return res.sendStatus(200); next() })
 
 const chatLimiter = rateLimit({
     windowMs: 60 * 1000,

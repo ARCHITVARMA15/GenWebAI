@@ -8,7 +8,7 @@ import { generateAndStoreEmbeddings } from "../services/embeddingService.js"
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000'
 
-async function injectWidgetAndEmbed(websiteId, htmlCode) {
+export async function injectWidgetAndEmbed(websiteId, htmlCode) {
     try {
         const widgetScript = `\n<script src="${BACKEND_URL}/widget.js"></script>\n<script>window.addEventListener('load',function(){if(typeof SiteChat!=='undefined')SiteChat.init({websiteId:"${websiteId}",primaryColor:"#6366f1",apiBase:"${BACKEND_URL}"});});</script>`
 
@@ -447,7 +447,7 @@ export const deploy = async(req, res)=>{
     }
 
     website.deployed = true
-    website.deployUrl = `${process.env.FRONTEND_URL}/site/${website.slug}`
+    website.deployUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/site/${website.slug}`
     await website.save()
 
     return res.status(200).json({

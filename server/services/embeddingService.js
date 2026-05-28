@@ -38,9 +38,10 @@ export async function embedSingleText(text) {
                 'Authorization': `Bearer ${process.env.VOYAGE_API_KEY}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ input: [text], model: 'voyage-02' })
+            body: JSON.stringify({ input: [text], model: 'voyage-2' })
         })
         const data = await res.json()
+        if (!res.ok) throw new Error(data?.detail || data?.message || `Voyage API error ${res.status}`)
         return data.data[0].embedding
     } catch (err) {
         throw new Error('Voyage embedding failed: ' + err.message)

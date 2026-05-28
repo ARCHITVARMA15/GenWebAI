@@ -1,5 +1,5 @@
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const AB_MODEL = 'openai/gpt-4o'
+const AB_MODEL = 'openrouter/owl-alpha'
 
 /**
  * Deterministically assigns a variant (a or b) to a session.
@@ -38,7 +38,7 @@ export const generateVariantB = async (originalHtml, targetSection, websiteConte
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are a conversion rate optimization expert.'
+                        content: 'You are a conversion rate optimization expert. Return ONLY raw HTML with no markdown, no code fences, no explanation.'
                     },
                     {
                         role: 'user',
@@ -56,7 +56,8 @@ export const generateVariantB = async (originalHtml, targetSection, websiteConte
         }
 
         const data = await res.json()
-        return data.choices[0].message.content.trim()
+        const raw = data.choices[0].message.content.trim()
+        return raw.replace(/^```(?:html)?\s*/i, '').replace(/```\s*$/i, '').trim()
     } finally {
         clearTimeout(timeout)
     }

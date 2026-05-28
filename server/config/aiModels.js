@@ -1,7 +1,7 @@
 const aiModels = {
     gemini: {
-        label: "DeepSeek V3",
-        modelId: "deepseek/deepseek-chat-v3-0324:free",
+        label: "Owl Alpha",
+        modelId: "openrouter/owl-alpha",
         description: "Fast, high-quality website generation",
         badge: "Free",
         creditsPerGeneration: 30,

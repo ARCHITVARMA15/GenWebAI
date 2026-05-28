@@ -11,7 +11,7 @@ trackingRouter.use((req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'POST, OPTIONS')
     next()
 })
-trackingRouter.options('*', (req, res) => res.sendStatus(200))
+trackingRouter.use((req, res, next) => { if (req.method === 'OPTIONS') return res.sendStatus(200); next() })
 
 const trackingLimiter = rateLimit({
     windowMs: 60 * 1000,

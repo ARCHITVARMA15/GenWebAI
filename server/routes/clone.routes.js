@@ -5,6 +5,7 @@ import { captureScreenshot } from '../services/screenshotService.js'
 import { cloneFromImage } from '../services/visionCloneService.js'
 import Website from '../models/website.model.js'
 import User from '../models/user.model.js'
+import { injectWidgetAndEmbed } from '../controllers/website.controllers.js'
 
 const router = express.Router()
 
@@ -64,6 +65,9 @@ router.post('/from-url', isAuth, async (req, res) => {
         user.credits = user.credits - CLONE_CREDITS
         await user.save()
 
+        injectWidgetAndEmbed(website._id.toString(), htmlContent)
+            .catch(err => console.error('Clone widget inject failed:', err.message))
+
         return res.status(201).json({
             success: true,
             data: {
@@ -103,6 +107,9 @@ router.post('/from-image', isAuth, upload.single('screenshot'), async (req, res)
 
         user.credits = user.credits - CLONE_CREDITS
         await user.save()
+
+        injectWidgetAndEmbed(website._id.toString(), htmlContent)
+            .catch(err => console.error('Clone widget inject failed:', err.message))
 
         return res.status(201).json({
             success: true,

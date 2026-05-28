@@ -2,7 +2,11 @@ import Groq from 'groq-sdk'
 import { embedSingleText, findRelevantChunks } from './embeddingService.js'
 import WebsiteEmbedding from '../models/WebsiteEmbedding.js'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+let _groq = null
+const getGroq = () => {
+    if (!_groq) _groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+    return _groq
+}
 
 export async function answerQuestion(websiteId, question, conversationHistory = []) {
     try {
@@ -26,8 +30,8 @@ export async function answerQuestion(websiteId, question, conversationHistory = 
         const userMessage = { role: 'user', content: question }
         const messages = [systemMessage, ...recentHistory, userMessage]
 
-        const response = await groq.chat.completions.create({
-            model: 'llama3-8b-8192',
+        const response = await getGroq().chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
             messages,
             max_tokens: 400,
             temperature: 0.4

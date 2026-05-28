@@ -1,5 +1,5 @@
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const VISION_MODEL = 'openai/gpt-4o'
+const VISION_MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'
 
 const CLONE_PROMPT = `You are an expert frontend developer. Analyze this website screenshot and recreate it as a complete, single-file HTML page.
 
@@ -21,6 +21,8 @@ export const cloneFromImage = async (base64Image, mimeType = 'image/png') => {
         headers: {
             Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
             'Content-Type': 'application/json',
+            'HTTP-Referer': process.env.BACKEND_URL || 'http://localhost:5000',
+            'X-Title': 'AIWebsiteBuilder Vision Clone',
         },
         body: JSON.stringify({
             model: VISION_MODEL,
@@ -33,7 +35,6 @@ export const cloneFromImage = async (base64Image, mimeType = 'image/png') => {
                             type: 'image_url',
                             image_url: {
                                 url: `data:${mimeType};base64,${base64Image}`,
-                                detail: 'high',
                             },
                         },
                         {

@@ -35,9 +35,6 @@ const allowedOrigins = [
     ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
 ]
 
-app.use('/api/chat', chatRouter)
-app.use('/api/track', trackingRouter)
-
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(helmet({ crossOriginOpenerPolicy: false }))
@@ -50,6 +47,9 @@ app.use(cors({
 app.use(globalLimiter)
 app.use(express.json({ limit: "10mb" }))
 app.use(cookieParser())
+
+app.use('/api/chat', chatRouter)
+app.use('/api/track', trackingRouter)
 
 app.use("/api/auth", authLimiter, authRouter)
 app.use("/api/user", userRouter)

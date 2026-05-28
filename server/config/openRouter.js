@@ -1,6 +1,6 @@
 const openRouterUrl = "https://openrouter.ai/api/v1/chat/completions";
 
-const defaultModel = "deepseek/deepseek-chat-v3-0324:free";
+const defaultModel = "openrouter/owl-alpha";
 
 export const generateResponse = async (prompt, modelId = defaultModel) => {
     const controller = new AbortController()
@@ -13,6 +13,8 @@ export const generateResponse = async (prompt, modelId = defaultModel) => {
             headers: {
                 Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
                 'Content-Type': 'application/json',
+                'HTTP-Referer': process.env.BACKEND_URL || 'http://localhost:5000',
+                'X-Title': 'AIWebsiteBuilder',
             },
             body: JSON.stringify({
                 model: modelId,
@@ -42,6 +44,8 @@ export const generateResponseStream = async (prompt, modelId = defaultModel) => 
         headers: {
             Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
             'Content-Type': 'application/json',
+            'HTTP-Referer': process.env.BACKEND_URL || 'http://localhost:5000',
+            'X-Title': 'AIWebsiteBuilder',
         },
         body: JSON.stringify({
             model: modelId,
