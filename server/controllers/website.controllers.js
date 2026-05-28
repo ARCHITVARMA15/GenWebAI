@@ -4,6 +4,22 @@ import extractJson  from "../utils/extractJson.js"
 import User from "../models/user.model.js"
 import { saveVersion } from "../utils/saveVersion.js"
 import aiModels from "../config/aiModels.js"
+import { generateAndStoreEmbeddings } from "../services/embeddingService.js"
+
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000'
+
+async function injectWidgetAndEmbed(websiteId, htmlCode) {
+    try {
+        const widgetScript = `\n<script src="${BACKEND_URL}/widget.js"></script>\n<script>window.addEventListener('load',function(){if(typeof SiteChat!=='undefined')SiteChat.init({websiteId:"${websiteId}",primaryColor:"#6366f1",apiBase:"${BACKEND_URL}"});});</script>`
+        const codeWithWidget = htmlCode.includes('</body>')
+            ? htmlCode.replace('</body>', widgetScript + '</body>')
+            : htmlCode + widgetScript
+        await Website.findByIdAndUpdate(websiteId, { latestCode: codeWithWidget })
+        await generateAndStoreEmbeddings(websiteId, htmlCode)
+    } catch (err) {
+        console.error('Post-generation tasks failed:', err.message)
+    }
+}
 
 const generateTimestamps = new Map()
 
@@ -235,6 +251,9 @@ export const generateWebsite = async (req, res) => {
     user.credits = user.credits - selectedModel.creditsPerGeneration;
     await user.save();
 
+    injectWidgetAndEmbed(website._id.toString(), parsed.code)
+        .catch(err => console.error('Background tasks failed:', err.message))
+
     return res.status(201).json({
         websiteId:website._id,
         remainingCredits:user.credits
@@ -341,6 +360,9 @@ Reply using EXACTLY this format — no JSON, no markdown:
         user.credits = user.credits - 10
         await user.save()
 
+        generateAndStoreEmbeddings(website._id.toString(), parsed.code)
+            .catch(err => console.error('Re-embedding after update failed:', err.message))
+
         return res.status(200).json({
           message:parsed.message,
           code:parsed.code,
@@ -352,6 +374,29 @@ Reply using EXACTLY this format — no JSON, no markdown:
     return res.status(500).json({message:`update website error ${error}`})
 
   }
+}
+
+export const patchWebsite = async (req, res) => {
+    try {
+        const { isWidgetEnabled, widgetColor } = req.body
+        const update = {}
+        if (typeof isWidgetEnabled === 'boolean') update.isWidgetEnabled = isWidgetEnabled
+        if (widgetColor !== undefined) {
+            if (!/^#[0-9A-Fa-f]{6}$/.test(widgetColor)) {
+                return res.status(400).json({ message: 'Invalid hex color' })
+            }
+            update.widgetColor = widgetColor
+        }
+        const website = await Website.findOneAndUpdate(
+            { _id: req.params.id, user: req.user._id },
+            update,
+            { new: true }
+        )
+        if (!website) return res.status(404).json({ message: 'website not found' })
+        return res.json({ isWidgetEnabled: website.isWidgetEnabled, widgetColor: website.widgetColor })
+    } catch (err) {
+        return res.status(500).json({ message: 'patch website error: ' + err.message })
+    }
 }
 
 export const deleteWebsite = async(req, res)=>{
@@ -504,6 +549,9 @@ export const generateWebsiteStream = async (req, res) => {
         await user.save()
 
         send({ done: true, websiteId: website._id, creditsLeft: user.credits })
+
+        injectWidgetAndEmbed(website._id.toString(), parsed.code)
+            .catch(err => console.error('Background tasks failed:', err.message))
 
     } catch (error) {
         send({ error: error.message || String(error) })

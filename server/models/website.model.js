@@ -87,6 +87,14 @@ const websiteSchema = new mongoose.Schema({
    },
    sourceUrl:{
     type:String
+   },
+   isWidgetEnabled:{
+    type:Boolean,
+    default:false
+   },
+   widgetColor:{
+    type:String,
+    default:'#6366f1'
    }
 
 

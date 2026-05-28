@@ -1,6 +1,8 @@
 import express from "express"
 import dotenv from "dotenv"
 dotenv.config()
+import path from "path"
+import { fileURLToPath } from "url"
 import connectDb from "./config/db.js"
 import authRouter from "./routes/auth.routes.js"
 import cookieParser from "cookie-parser"
@@ -15,7 +17,11 @@ import galleryRouter from "./routes/gallery.routes.js"
 import cloneRouter from "./routes/clone.routes.js"
 import brandRouter from "./routes/brand.routes.js"
 import uploadRouter from "./routes/upload.routes.js"
+import chatRouter from "./routes/chat.routes.js"
 import { globalLimiter, authLimiter, paymentLimiter } from "./middlewares/rateLimiter.js"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const app = express()
 const port = process.env.PORT || 5000
@@ -26,11 +32,15 @@ const allowedOrigins = [
     ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
 ]
 
+app.use('/api/chat', chatRouter)
+
+app.use(express.static(path.join(__dirname, 'public')))
+
 app.use(helmet({ crossOriginOpenerPolicy: false }))
 app.use(cors({
     origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }))
 app.use(globalLimiter)
