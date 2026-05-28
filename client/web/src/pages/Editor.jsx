@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { serverUrl } from '../App'
 import { useState } from 'react'
-import { ArrowLeft, Code, Code2, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, X } from 'lucide-react'
+import { ArrowLeft, Code, Code2, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, Smartphone, X } from 'lucide-react'
 import { useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import VersionHistoryPanel from '../components/VersionHistoryPanel'
@@ -27,6 +27,7 @@ function WebsiteEditor() {
     const [showHistory, setShowHistory] = useState(false)
     const [showAssets, setShowAssets] = useState(false)
     const [updateError, setUpdateError] = useState('')
+    const [mobileView, setMobileView] = useState(false)
     const thinkingSteps = [
         "Understanding your request…",
         "Planning layout changes…",
@@ -174,13 +175,29 @@ function WebsiteEditor() {
 
                         <button className='p-2' onClick={() => setShowHistory((v) => !v)} title="Version History"><History size={18} /></button>
                         <button className='p-2' onClick={() => setShowAssets((v) => !v)} title="Image Assets"><ImageIcon size={18} /></button>
+                        <button
+                            className={`p-2 rounded-lg transition ${mobileView ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white'}`}
+                            onClick={() => setMobileView(v => !v)}
+                            title="Mobile Preview"
+                        ><Smartphone size={18} /></button>
                         <button className='p-2' onClick={() => setShowCode(true)}><Code2 size={18} /></button>
                         <button className='p-2' onClick={() => setShowFullPreview(true)}><Monitor size={18} /></button>
                     </div>
 
                 </div>
 
-                <iframe ref={iframeRef} sandbox='allow-scripts allow-same-origin allow-forms' className='flex-1 w-full bg-white' />
+                <div className={`flex-1 overflow-auto ${mobileView ? 'flex items-start justify-center bg-zinc-950 py-8' : 'flex flex-col'}`}>
+                    {mobileView ? (
+                        <div className='w-[390px] shrink-0 rounded-[40px] border-[8px] border-zinc-700 shadow-2xl overflow-hidden flex flex-col' style={{ height: 844 }}>
+                            <div className='h-7 bg-zinc-800 shrink-0 flex items-center justify-center'>
+                                <div className='w-20 h-1.5 rounded-full bg-zinc-600' />
+                            </div>
+                            <iframe ref={iframeRef} sandbox='allow-scripts allow-same-origin allow-forms' className='flex-1 w-full bg-white' />
+                        </div>
+                    ) : (
+                        <iframe ref={iframeRef} sandbox='allow-scripts allow-same-origin allow-forms' className='flex-1 w-full bg-white' />
+                    )}
+                </div>
             </div>
 
             <AnimatePresence>

@@ -1,9 +1,9 @@
 const aiModels = {
     gemini: {
-        label: "Gemini 2.5 Flash",
-        modelId: "openrouter/auto",
-        description: "Fast and free tier compatible",
-        badge: "Fastest",
+        label: "DeepSeek V3",
+        modelId: "deepseek/deepseek-chat-v3-0324:free",
+        description: "Fast, high-quality website generation",
+        badge: "Free",
         creditsPerGeneration: 30,
         available: ["free", "pro", "enterprise"]
     },

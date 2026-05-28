@@ -1,6 +1,6 @@
 const openRouterUrl = "https://openrouter.ai/api/v1/chat/completions";
 
-const defaultModel = "openrouter/auto";
+const defaultModel = "deepseek/deepseek-chat-v3-0324:free";
 
 export const generateResponse = async (prompt, modelId = defaultModel) => {
     const controller = new AbortController()

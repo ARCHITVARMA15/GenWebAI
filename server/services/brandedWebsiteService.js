@@ -1,5 +1,5 @@
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const MODEL = 'openrouter/auto'
+const MODEL = 'deepseek/deepseek-chat-v3-0324:free'
 
 export const generateBrandedWebsite = async (userPrompt, brandKit) => {
     const systemMsg = `You are an expert frontend developer who creates stunning, conversion-focused websites.`

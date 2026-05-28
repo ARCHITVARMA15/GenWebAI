@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import {
     CheckCircle2, Loader2, Download, Copy, ExternalLink,
-    Palette, Sparkles, RefreshCw, Pencil, Type, Star
+    Palette, Sparkles, RefreshCw, Pencil, Type, Star, Smartphone, Monitor
 } from 'lucide-react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
@@ -50,6 +50,7 @@ function BrandKitGenerator() {
     const [placeholderIdx, setPlaceholderIdx] = useState(0)
     const [copied, setCopied] = useState(false)
     const [regenLoading, setRegenLoading] = useState(false)
+    const [mobilePreview, setMobilePreview] = useState(false)
     const timersRef = useRef([])
 
     // Cycling placeholder
@@ -317,7 +318,12 @@ function BrandKitGenerator() {
                 >
                     <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
                         <span className="text-xs font-medium text-zinc-400">Website Preview</span>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 items-center">
+                            <button
+                                onClick={() => setMobilePreview(v => !v)}
+                                title="Toggle mobile preview"
+                                className={`p-1.5 rounded-lg border transition ${mobilePreview ? 'bg-white/10 border-white/20 text-white' : 'bg-transparent border-white/10 text-zinc-400 hover:text-white'}`}
+                            >{mobilePreview ? <Monitor size={13} /> : <Smartphone size={13} />}</button>
                             <button
                                 onClick={() => window.open(`data:text/html;charset=utf-8,${encodeURIComponent(adjustedHtml || htmlContent)}`, '_blank')}
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-white/10 hover:bg-white/15 border border-white/10 transition">
@@ -329,13 +335,27 @@ function BrandKitGenerator() {
                             </button>
                         </div>
                     </div>
-                    <div className="flex-1 relative min-h-[400px]">
-                        <iframe
-                            srcDoc={adjustedHtml || htmlContent}
-                            className="absolute inset-0 w-full h-full bg-white"
-                            sandbox="allow-scripts"
-                            title="Brand website preview"
-                        />
+                    <div className={`flex-1 relative min-h-[400px] ${mobilePreview ? 'flex items-start justify-center bg-zinc-950 py-6 overflow-auto' : ''}`}>
+                        {mobilePreview ? (
+                            <div className='w-[320px] shrink-0 rounded-[32px] border-[6px] border-zinc-700 shadow-2xl overflow-hidden flex flex-col' style={{ height: 620 }}>
+                                <div className='h-5 bg-zinc-800 shrink-0 flex items-center justify-center'>
+                                    <div className='w-14 h-1 rounded-full bg-zinc-600' />
+                                </div>
+                                <iframe
+                                    srcDoc={adjustedHtml || htmlContent}
+                                    className='flex-1 w-full bg-white'
+                                    sandbox='allow-scripts'
+                                    title='Brand website mobile preview'
+                                />
+                            </div>
+                        ) : (
+                            <iframe
+                                srcDoc={adjustedHtml || htmlContent}
+                                className="absolute inset-0 w-full h-full bg-white"
+                                sandbox="allow-scripts"
+                                title="Brand website preview"
+                            />
+                        )}
                     </div>
                 </motion.div>
             </div>
