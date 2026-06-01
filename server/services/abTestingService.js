@@ -1,6 +1,4 @@
-import { generateWithGemini } from '../config/geminiService.js'
-
-const AB_MODEL = 'gemini-2.0-flash'
+import { generateResponse } from '../config/openRouter.js'
 
 /**
  * Deterministically assigns a variant (a or b) to a session.
@@ -21,18 +19,11 @@ export const assignVariant = (sessionId) => {
  * for the given HTML section. Returns the raw HTML string.
  */
 export const generateVariantB = async (originalHtml, targetSection, websiteContext) => {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 60000)
+    const systemPrompt = 'You are a conversion rate optimization expert. Return ONLY raw HTML with no markdown, no code fences, no explanation.'
+    const userPrompt = `Here is the ${targetSection} section of a website:\n${originalHtml}\n\nWebsite context: ${websiteContext}\n\nGenerate an alternative version of ONLY this section that:\n1. Has a stronger, more compelling headline\n2. Uses more action-oriented CTA button text\n3. Adds a subtle social proof element (e.g., '10,000+ sites built')\n4. Keeps the same Tailwind CSS styling approach\n5. Returns ONLY the HTML for this section, no explanation`
 
-    try {
-        const systemPrompt = 'You are a conversion rate optimization expert. Return ONLY raw HTML with no markdown, no code fences, no explanation.'
-        const userPrompt = `Here is the ${targetSection} section of a website:\n${originalHtml}\n\nWebsite context: ${websiteContext}\n\nGenerate an alternative version of ONLY this section that:\n1. Has a stronger, more compelling headline\n2. Uses more action-oriented CTA button text\n3. Adds a subtle social proof element (e.g., '10,000+ sites built')\n4. Keeps the same Tailwind CSS styling approach\n5. Returns ONLY the HTML for this section, no explanation`
-
-        const raw = await generateWithGemini(userPrompt, systemPrompt, AB_MODEL)
-        return raw.replace(/^```(?:html)?\s*/i, '').replace(/```\s*$/i, '').trim()
-    } finally {
-        clearTimeout(timeout)
-    }
+    const raw = await generateResponse(userPrompt, null, systemPrompt)
+    return raw.replace(/^```(?:html)?\s*/i, '').replace(/```\s*$/i, '').trim()
 }
 
 /**

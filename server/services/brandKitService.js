@@ -1,5 +1,5 @@
 import extractJson from '../utils/extractJson.js'
-import { generateWithGemini } from '../config/geminiService.js'
+import { generateResponse } from '../config/openRouter.js'
 
 const buildGoogleFontsUrl = (headingFont, bodyFont) => {
     const h = headingFont.replace(/ /g, '+')
@@ -8,7 +8,7 @@ const buildGoogleFontsUrl = (headingFont, bodyFont) => {
 }
 
 const callGemini = async (systemMsg, userMsg) => {
-    return generateWithGemini(userMsg, systemMsg, 'gemini-2.0-flash')
+    return generateResponse(userMsg, null, systemMsg)
 }
 
 const BRAND_SYSTEM = `You are a world-class brand strategist and designer.`

@@ -1,4 +1,4 @@
-import { generateWithGemini, generateWithGeminiStream } from "../config/geminiService.js"
+import { generateResponse, generateResponseStream } from "../config/openRouter.js"
 import Website from "../models/website.model.js"
 import extractJson  from "../utils/extractJson.js"
 import User from "../models/user.model.js"
@@ -15,7 +15,7 @@ export async function injectWidgetAndEmbed(websiteId, htmlCode) {
         // A/B tracking script — injected into every generated site.
         // Assigns visitors deterministically to variant a/b, then fires visit + click events.
         // Phase 2 note: replace DOM section with variant B HTML inside the 'ab_variant' listener below.
-        const abScript = `\n<script>(function(){try{var sid=localStorage.getItem('_sid')||Math.random().toString(36).slice(2);localStorage.setItem('_sid',sid);var wid="${websiteId}";var apiBase="${BACKEND_URL}";var hash=0;for(var i=0;i<sid.length;i++){hash=(hash<<5)-hash+sid.charCodeAt(i);hash|=0;}var variant=Math.abs(hash)%2===0?'a':'b';fetch(apiBase+'/api/track/visit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({websiteId:wid,sessionId:sid,variantServed:variant})}).catch(function(){});document.querySelectorAll('a[href],button').forEach(function(el){el.addEventListener('click',function(){fetch(apiBase+'/api/track/click',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({websiteId:wid,sessionId:sid,variantServed:variant})}).catch(function(){});});});/* Phase 2: swap variant B section via DOM — document.addEventListener('ab_variant',function(e){if(e.detail.variant==='b'){} }); */if(variant==='b'){document.dispatchEvent(new CustomEvent('ab_variant',{detail:{variant:'b'}}));}}catch(e){}})();</script>`
+        const abScript = `\n<script>(function(){try{var sid=localStorage.getItem('_sid')||Math.random().toString(36).slice(2);localStorage.setItem('_sid',sid);var wid="${websiteId}";var apiBase="${BACKEND_URL}";var hash=0;for(var i=0;i<sid.length;i++){hash=(hash<<5)-hash+sid.charCodeAt(i);hash|=0;}var variant=Math.abs(hash)%2===0?'a':'b';fetch(apiBase+'/api/track/visit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({websiteId:wid,sessionId:sid,variantServed:variant})}).catch(function(){});document.querySelectorAll('a[href],button').forEach(function(el){el.addEventListener('click',function(){fetch(apiBase+'/api/track/click',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({websiteId:wid,sessionId:sid,variantServed:variant})}).catch(function(){});});});if(variant==='b'){fetch(apiBase+'/api/experiments/'+wid+'/variant-b').then(function(r){return r.json()}).then(function(data){if(!data.active||!data.variantB_html)return;var sec=data.targetSection;var el=document.getElementById(sec)||document.querySelector('.'+sec)||document.querySelector('[class*="'+sec+'"]')||document.querySelector('section');if(el){var tmp=document.createElement('div');tmp.innerHTML=data.variantB_html;el.replaceWith(tmp.firstElementChild||tmp);}}).catch(function(){});}}catch(e){}})();</script>`
 
         const injections = widgetScript + abScript
         const codeWithAll = htmlCode.includes('</body>')
@@ -117,6 +117,14 @@ IMAGES (MANDATORY & RESPONSIVE)
   - Be responsive (max-width: 100%)
   - Resize correctly on mobile
   - Never overflow containers
+
+--------------------------------------------------
+UI MOCKUP RULES (VERY IMPORTANT)
+--------------------------------------------------
+- NEVER use <img> tags for UI mockups, dashboards, app screenshots, or browser frames
+- Build ALL mockups using CSS divs, gradients, borders, and box-shadows ONLY
+- A "dashboard mockup" = a styled <div> with a dark background, inner colored bars, cards, and chart shapes made from CSS
+- Navbars MUST use flexbox: logo on the left, nav links in the center, CTA button on the right — all on ONE row. Use justify-content: space-between and align-items: center. NEVER let the CTA wrap to a second line.
 
 --------------------------------------------------
 TECHNICAL RULES (VERY IMPORTANT)
@@ -224,11 +232,11 @@ export const generateWebsite = async (req, res) => {
     let raw = ""
     let parsed =null
     for(let i=0;i<2 && !parsed;i++){
-        raw = await generateWithGemini(finalPrompt, 'You must return ONLY valid raw JSON.', selectedModel.modelId)
+        raw = await generateResponse(finalPrompt)
         parsed = await extractJson(raw)
 
         if(!parsed){
-            raw = await generateWithGemini(finalPrompt + "\n\nRETURN ONLY RAW JSON.", 'You must return ONLY valid raw JSON.', selectedModel.modelId)
+            raw = await generateResponse(finalPrompt + "\n\nRETURN ONLY RAW JSON.")
             parsed = await extractJson(raw)
         }
     }
@@ -337,7 +345,7 @@ Reply using EXACTLY this format — no JSON, no markdown:
 
              let raw = ""
              for(let i = 0; i < 2; i++){
-                raw = await generateWithGemini(updatePrompt, 'You are an expert web developer. Return only the requested format, nothing else.', 'gemini-2.0-flash')
+                raw = await generateResponse(updatePrompt)
                 if(raw && raw.includes('<CODE>')) break
              }
 
@@ -505,7 +513,8 @@ export const generateWebsiteStream = async (req, res) => {
         trackGenerate(req.user._id.toString())
 
         const finalPrompt = masterPrompt.replace('{USER_PROMPT}', prompt)
-        const streamBody = await generateWithGeminiStream(finalPrompt, 'You must return ONLY valid raw JSON.', selectedModel.modelId)
+
+        const streamBody = await generateResponseStream(finalPrompt)
 
         const reader = streamBody.getReader()
         const decoder = new TextDecoder()
@@ -524,7 +533,7 @@ export const generateWebsiteStream = async (req, res) => {
                 if (raw === '[DONE]') continue
                 try {
                     const parsed = JSON.parse(raw)
-                    const token = parsed.candidates?.[0]?.content?.parts?.[0]?.text || ''
+                    const token = parsed.choices?.[0]?.delta?.content || ''
                     if (token) {
                         fullContent += token
                         send({ chunk: token })
@@ -535,7 +544,7 @@ export const generateWebsiteStream = async (req, res) => {
 
         let parsed = await extractJson(fullContent)
         if (!parsed) {
-            const retryRaw = await generateWithGemini(finalPrompt + '\n\nRETURN ONLY RAW JSON.', 'You must return ONLY valid raw JSON.', selectedModel.modelId)
+            const retryRaw = await generateResponse(finalPrompt + '\n\nRETURN ONLY RAW JSON.')
             parsed = await extractJson(retryRaw)
         }
 

@@ -99,6 +99,26 @@ experimentsRouter.post('/start', isAuth, async (req, res) => {
     }
 })
 
+// GET /api/experiments/:websiteId/variant-b  (PUBLIC — called by injected script in live sites)
+experimentsRouter.get('/:websiteId/variant-b', async (req, res) => {
+    try {
+        const experiment = await Experiment.findOne({
+            websiteId: req.params.websiteId,
+            status: 'running'
+        }).sort({ startedAt: -1 })
+
+        if (!experiment) return res.json({ active: false })
+
+        return res.json({
+            active: true,
+            targetSection: experiment.targetSection,
+            variantB_html: experiment.variants.b.htmlSnippet
+        })
+    } catch (err) {
+        return res.status(500).json({ active: false })
+    }
+})
+
 // GET /api/experiments/:websiteId/active
 experimentsRouter.get('/:websiteId/active', isAuth, async (req, res) => {
     try {

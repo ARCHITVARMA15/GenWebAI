@@ -1,4 +1,4 @@
-import { generateWithGeminiVision } from '../config/geminiService.js'
+import { generateVisionResponse } from '../config/openRouter.js'
 
 const CLONE_PROMPT = `You are an expert frontend developer. Analyze this website screenshot and recreate it as a complete, single-file HTML page.
 
@@ -15,7 +15,7 @@ REQUIREMENTS:
 - Do not include any explanation, markdown, or code fences — raw HTML only`
 
 export const cloneFromImage = async (base64Image, mimeType = 'image/png') => {
-    let html = await generateWithGeminiVision(base64Image, mimeType, CLONE_PROMPT, 'gemini-2.0-flash')
+    let html = await generateVisionResponse(base64Image, mimeType, CLONE_PROMPT)
     html = html.replace(/^```html\n?/i, '').replace(/```$/, '').trim()
     return html
 }

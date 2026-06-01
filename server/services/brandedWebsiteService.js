@@ -1,4 +1,4 @@
-import { generateWithGemini } from '../config/geminiService.js'
+import { generateResponse } from '../config/openRouter.js'
 
 export const generateBrandedWebsite = async (userPrompt, brandKit) => {
     const systemMsg = `You are an expert frontend developer who creates stunning, conversion-focused websites.`
@@ -33,7 +33,7 @@ REQUIREMENTS:
 
 Original user description: ${userPrompt}`
 
-    let html = await generateWithGemini(userMsg, systemMsg, 'gemini-2.0-flash')
+    let html = await generateResponse(userMsg, null, systemMsg)
     html = html.replace(/^```html\n?/i, '').replace(/```$/, '').trim()
     return html
 }
