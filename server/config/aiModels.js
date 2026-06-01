@@ -1,7 +1,7 @@
 const aiModels = {
     gemini: {
-        label: "Owl Alpha",
-        modelId: "openrouter/owl-alpha",
+        label: "Gemini 2.0 Flash",
+        modelId: "gemini-2.0-flash",
         description: "Fast, high-quality website generation",
         badge: "Free",
         creditsPerGeneration: 30,

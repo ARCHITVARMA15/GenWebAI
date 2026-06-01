@@ -6,6 +6,7 @@ import { cloneFromImage } from '../services/visionCloneService.js'
 import Website from '../models/website.model.js'
 import User from '../models/user.model.js'
 import { injectWidgetAndEmbed } from '../controllers/website.controllers.js'
+import { cloneLimiter } from '../middlewares/rateLimiter.js'
 
 const router = express.Router()
 
@@ -25,7 +26,7 @@ const upload = multer({
     },
 })
 
-router.post('/from-url', isAuth, async (req, res) => {
+router.post('/from-url', isAuth, cloneLimiter, async (req, res) => {
     try {
         let { url } = req.body
 
@@ -81,7 +82,7 @@ router.post('/from-url', isAuth, async (req, res) => {
     }
 })
 
-router.post('/from-image', isAuth, upload.single('screenshot'), async (req, res) => {
+router.post('/from-image', isAuth, cloneLimiter, upload.single('screenshot'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: 'Please upload an image file' })

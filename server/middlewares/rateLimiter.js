@@ -37,6 +37,26 @@ export const generateLimiter = rateLimit({
     handler
 })
 
+export const updateLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => req.user?._id?.toString() || req.ip,
+    validate: { keyGeneratorIpFallback: false },
+    handler
+})
+
+export const cloneLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 3,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => req.user?._id?.toString() || req.ip,
+    validate: { keyGeneratorIpFallback: false },
+    handler
+})
+
 export const paymentLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 20,

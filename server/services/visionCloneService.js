@@ -1,5 +1,4 @@
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const VISION_MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'
+import { generateWithGeminiVision } from '../config/geminiService.js'
 
 const CLONE_PROMPT = `You are an expert frontend developer. Analyze this website screenshot and recreate it as a complete, single-file HTML page.
 
@@ -16,46 +15,7 @@ REQUIREMENTS:
 - Do not include any explanation, markdown, or code fences — raw HTML only`
 
 export const cloneFromImage = async (base64Image, mimeType = 'image/png') => {
-    const res = await fetch(OPENROUTER_URL, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': process.env.BACKEND_URL || 'http://localhost:5000',
-            'X-Title': 'AIWebsiteBuilder Vision Clone',
-        },
-        body: JSON.stringify({
-            model: VISION_MODEL,
-            max_tokens: 4096,
-            messages: [
-                {
-                    role: 'user',
-                    content: [
-                        {
-                            type: 'image_url',
-                            image_url: {
-                                url: `data:${mimeType};base64,${base64Image}`,
-                            },
-                        },
-                        {
-                            type: 'text',
-                            text: CLONE_PROMPT,
-                        },
-                    ],
-                },
-            ],
-        }),
-    })
-
-    if (!res.ok) {
-        const errorText = await res.text()
-        throw new Error(`Vision API error: ${errorText}`)
-    }
-
-    const data = await res.json()
-    let html = data.choices?.[0]?.message?.content || ''
-
+    let html = await generateWithGeminiVision(base64Image, mimeType, CLONE_PROMPT, 'gemini-2.0-flash')
     html = html.replace(/^```html\n?/i, '').replace(/```$/, '').trim()
-
     return html
 }

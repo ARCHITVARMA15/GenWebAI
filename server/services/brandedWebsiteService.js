@@ -1,5 +1,4 @@
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const MODEL = 'deepseek/deepseek-chat-v3-0324:free'
+import { generateWithGemini } from '../config/geminiService.js'
 
 export const generateBrandedWebsite = async (userPrompt, brandKit) => {
     const systemMsg = `You are an expert frontend developer who creates stunning, conversion-focused websites.`
@@ -34,30 +33,7 @@ REQUIREMENTS:
 
 Original user description: ${userPrompt}`
 
-    const res = await fetch(OPENROUTER_URL, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            model: MODEL,
-            max_tokens: 4096,
-            temperature: 0.5,
-            messages: [
-                { role: 'system', content: systemMsg },
-                { role: 'user', content: userMsg },
-            ],
-        }),
-    })
-
-    if (!res.ok) {
-        const err = await res.text()
-        throw new Error(`OpenRouter website gen error: ${err}`)
-    }
-
-    const data = await res.json()
-    let html = data.choices[0].message.content || ''
+    let html = await generateWithGemini(userMsg, systemMsg, 'gemini-2.0-flash')
     html = html.replace(/^```html\n?/i, '').replace(/```$/, '').trim()
     return html
 }

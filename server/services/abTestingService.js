@@ -1,5 +1,6 @@
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const AB_MODEL = 'openrouter/owl-alpha'
+import { generateWithGemini } from '../config/geminiService.js'
+
+const AB_MODEL = 'gemini-2.0-flash'
 
 /**
  * Deterministically assigns a variant (a or b) to a session.
@@ -24,39 +25,10 @@ export const generateVariantB = async (originalHtml, targetSection, websiteConte
     const timeout = setTimeout(() => controller.abort(), 60000)
 
     try {
-        const res = await fetch(OPENROUTER_URL, {
-            method: 'POST',
-            signal: controller.signal,
-            headers: {
-                Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': process.env.BACKEND_URL || 'http://localhost:5000',
-                'X-Title': 'AIWebsiteBuilder A/B Testing'
-            },
-            body: JSON.stringify({
-                model: AB_MODEL,
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are a conversion rate optimization expert. Return ONLY raw HTML with no markdown, no code fences, no explanation.'
-                    },
-                    {
-                        role: 'user',
-                        content: `Here is the ${targetSection} section of a website:\n${originalHtml}\n\nWebsite context: ${websiteContext}\n\nGenerate an alternative version of ONLY this section that:\n1. Has a stronger, more compelling headline\n2. Uses more action-oriented CTA button text\n3. Adds a subtle social proof element (e.g., '10,000+ sites built')\n4. Keeps the same Tailwind CSS styling approach\n5. Returns ONLY the HTML for this section, no explanation`
-                    }
-                ],
-                temperature: 0.7,
-                max_tokens: 4096
-            })
-        })
+        const systemPrompt = 'You are a conversion rate optimization expert. Return ONLY raw HTML with no markdown, no code fences, no explanation.'
+        const userPrompt = `Here is the ${targetSection} section of a website:\n${originalHtml}\n\nWebsite context: ${websiteContext}\n\nGenerate an alternative version of ONLY this section that:\n1. Has a stronger, more compelling headline\n2. Uses more action-oriented CTA button text\n3. Adds a subtle social proof element (e.g., '10,000+ sites built')\n4. Keeps the same Tailwind CSS styling approach\n5. Returns ONLY the HTML for this section, no explanation`
 
-        if (!res.ok) {
-            const errorText = await res.text()
-            throw new Error(`OpenRouter API error: ${errorText}`)
-        }
-
-        const data = await res.json()
-        const raw = data.choices[0].message.content.trim()
+        const raw = await generateWithGemini(userPrompt, systemPrompt, AB_MODEL)
         return raw.replace(/^```(?:html)?\s*/i, '').replace(/```\s*$/i, '').trim()
     } finally {
         clearTimeout(timeout)

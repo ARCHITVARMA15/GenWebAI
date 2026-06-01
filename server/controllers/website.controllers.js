@@ -1,4 +1,4 @@
-import { generateResponse, generateResponseStream } from "../config/openRouter.js"
+import { generateWithGemini, generateWithGeminiStream } from "../config/geminiService.js"
 import Website from "../models/website.model.js"
 import extractJson  from "../utils/extractJson.js"
 import User from "../models/user.model.js"
@@ -224,11 +224,11 @@ export const generateWebsite = async (req, res) => {
     let raw = ""
     let parsed =null
     for(let i=0;i<2 && !parsed;i++){
-        raw = await generateResponse(finalPrompt, selectedModel.modelId)
+        raw = await generateWithGemini(finalPrompt, 'You must return ONLY valid raw JSON.', selectedModel.modelId)
         parsed = await extractJson(raw)
 
         if(!parsed){
-            raw = await generateResponse(finalPrompt + "\n\nRETURN ONLY RAW JSON.", selectedModel.modelId);
+            raw = await generateWithGemini(finalPrompt + "\n\nRETURN ONLY RAW JSON.", 'You must return ONLY valid raw JSON.', selectedModel.modelId)
             parsed = await extractJson(raw)
         }
     }
@@ -337,7 +337,7 @@ Reply using EXACTLY this format — no JSON, no markdown:
 
              let raw = ""
              for(let i = 0; i < 2; i++){
-                raw = await generateResponse(updatePrompt)
+                raw = await generateWithGemini(updatePrompt, 'You are an expert web developer. Return only the requested format, nothing else.', 'gemini-2.0-flash')
                 if(raw && raw.includes('<CODE>')) break
              }
 
@@ -505,7 +505,7 @@ export const generateWebsiteStream = async (req, res) => {
         trackGenerate(req.user._id.toString())
 
         const finalPrompt = masterPrompt.replace('{USER_PROMPT}', prompt)
-        const streamBody = await generateResponseStream(finalPrompt, selectedModel.modelId)
+        const streamBody = await generateWithGeminiStream(finalPrompt, 'You must return ONLY valid raw JSON.', selectedModel.modelId)
 
         const reader = streamBody.getReader()
         const decoder = new TextDecoder()
@@ -524,7 +524,7 @@ export const generateWebsiteStream = async (req, res) => {
                 if (raw === '[DONE]') continue
                 try {
                     const parsed = JSON.parse(raw)
-                    const token = parsed.choices?.[0]?.delta?.content || ''
+                    const token = parsed.candidates?.[0]?.content?.parts?.[0]?.text || ''
                     if (token) {
                         fullContent += token
                         send({ chunk: token })
@@ -535,7 +535,7 @@ export const generateWebsiteStream = async (req, res) => {
 
         let parsed = await extractJson(fullContent)
         if (!parsed) {
-            const retryRaw = await generateResponse(finalPrompt + '\n\nRETURN ONLY RAW JSON.', selectedModel.modelId)
+            const retryRaw = await generateWithGemini(finalPrompt + '\n\nRETURN ONLY RAW JSON.', 'You must return ONLY valid raw JSON.', selectedModel.modelId)
             parsed = await extractJson(retryRaw)
         }
 

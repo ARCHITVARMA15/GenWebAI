@@ -1,7 +1,5 @@
 import extractJson from '../utils/extractJson.js'
-
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const MODEL = 'deepseek/deepseek-chat-v3-0324:free'
+import { generateWithGemini } from '../config/geminiService.js'
 
 const buildGoogleFontsUrl = (headingFont, bodyFont) => {
     const h = headingFont.replace(/ /g, '+')
@@ -9,28 +7,8 @@ const buildGoogleFontsUrl = (headingFont, bodyFont) => {
     return `https://fonts.googleapis.com/css2?family=${encodeURIComponent(headingFont)}:wght@400;700&family=${encodeURIComponent(bodyFont)}:wght@400;500&display=swap`
 }
 
-const callOpenRouter = async (systemMsg, userMsg, temperature = 0.7) => {
-    const res = await fetch(OPENROUTER_URL, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            model: MODEL,
-            temperature,
-            messages: [
-                { role: 'system', content: systemMsg },
-                { role: 'user', content: userMsg },
-            ],
-        }),
-    })
-    if (!res.ok) {
-        const err = await res.text()
-        throw new Error(`OpenRouter error: ${err}`)
-    }
-    const data = await res.json()
-    return data.choices[0].message.content || ''
+const callGemini = async (systemMsg, userMsg) => {
+    return generateWithGemini(userMsg, systemMsg, 'gemini-2.0-flash')
 }
 
 const BRAND_SYSTEM = `You are a world-class brand strategist and designer.`
@@ -58,7 +36,7 @@ Return a JSON object with EXACTLY this structure (no extra fields, no markdown):
 
 export const generateBrandKit = async (userPrompt) => {
     // Step 1 — Brand DNA extraction
-    let brandRaw = await callOpenRouter(BRAND_SYSTEM, buildBrandPrompt(userPrompt))
+    let brandRaw = await callGemini(BRAND_SYSTEM, buildBrandPrompt(userPrompt))
     let brandData = null
 
     try {
@@ -66,7 +44,7 @@ export const generateBrandKit = async (userPrompt) => {
     } catch (_) {}
 
     if (!brandData) {
-        brandRaw = await callOpenRouter(BRAND_SYSTEM, buildBrandPrompt(userPrompt, true))
+        brandRaw = await callGemini(BRAND_SYSTEM, buildBrandPrompt(userPrompt, true))
         try {
             brandData = await extractJson(brandRaw)
         } catch (_) {}
@@ -100,7 +78,7 @@ REQUIREMENTS:
 - NO text in the SVG — icon only
 - Must look professional at both 200px and 32px (favicon size)`
 
-    let svgRaw = await callOpenRouter(logoSystemMsg, logoUserMsg, 0.8)
+    let svgRaw = await callGemini(logoSystemMsg, logoUserMsg)
 
     // Strip markdown fences
     let logoSvg = svgRaw
