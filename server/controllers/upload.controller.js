@@ -47,7 +47,7 @@ export const uploadImage = async (req, res) => {
         })
     } catch (error) {
         console.error('Upload error:', error)
-        return res.status(500).json({ message: 'Upload failed. Please try again.' })
+        return res.status(500).json({ message: error?.message || 'Upload failed. Please try again.' })
     }
 }
 

@@ -1,6 +1,5 @@
+import 'dotenv/config'
 import express from "express"
-import dotenv from "dotenv"
-dotenv.config()
 import path from "path"
 import { fileURLToPath } from "url"
 import connectDb from "./config/db.js"
