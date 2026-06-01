@@ -86,7 +86,7 @@
 // export default Generate
 
 
-import { ArrowLeft, Lock, X, Zap, Sparkles } from 'lucide-react'
+import { ArrowLeft, Lock, Sparkles, Wand2, X, Zap } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from "motion/react"
@@ -115,6 +115,7 @@ function Generate() {
     const [websiteId, setWebsiteId] = useState(null)
     const [selectedModel, setSelectedModel] = useState('gemini')
     const [models, setModels] = useState([])
+    const [optimizing, setOptimizing] = useState(false)
     const abortRef = useRef(null)
 
     const charCount = streamedContent.length
@@ -187,6 +188,26 @@ function Generate() {
             if (err.name === 'AbortError') return
             setError(err.message || "Something went wrong")
             setLoading(false)
+        }
+    }
+
+    const handleOptimizePrompt = async () => {
+        if (!prompt.trim() || optimizing) return
+        setOptimizing(true)
+        try {
+            const res = await fetch(`${serverUrl}/api/website/optimize-prompt`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ prompt })
+            })
+            const data = await res.json()
+            if (!res.ok) { setError(data.message || 'Optimization failed'); return }
+            setPrompt(data.optimizedPrompt)
+        } catch {
+            setError('Prompt optimization failed')
+        } finally {
+            setOptimizing(false)
         }
     }
 
@@ -295,14 +316,26 @@ function Generate() {
                             </div>
                         )}
                         <div className='mb-14'>
-                            <h1 className='text-xl font-semibold mb-2'>Describe your website</h1>
+                            <div className='flex items-center justify-between mb-2'>
+                                <h1 className='text-xl font-semibold'>Describe your website</h1>
+                                <button
+                                    onClick={handleOptimizePrompt}
+                                    disabled={!prompt.trim() || optimizing}
+                                    className='flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed'
+                                    style={{ borderColor: 'rgba(167,139,250,0.4)', background: 'rgba(167,139,250,0.08)', color: '#c4b5fd' }}
+                                    title='Optimize your prompt with AI (5 credits)'
+                                >
+                                    {optimizing ? <><Wand2 size={11} className='animate-pulse' /> Optimizing...</> : <><Wand2 size={11} /> ✨ Optimize Prompt</>}
+                                </button>
+                            </div>
                             <textarea
                                 onChange={(e) => setPrompt(e.target.value)}
                                 value={prompt}
                                 placeholder='Describe your website in detail...'
                                 className='w-full h-56 p-6 rounded-3xl bg-black/60 border border-white/10 outline-none resize-none text-sm leading-relaxed focus:ring-2 focus:ring-white/20'
                             />
-                            {error && <p className='mt-4 text-sm text-red-400'>{error}</p>}
+                            <p className='text-[11px] text-zinc-600 mt-1.5 text-right'>✨ Optimize rewrites your prompt for better output — 5 credits</p>
+                            {error && <p className='mt-3 text-sm text-red-400'>{error}</p>}
                         </div>
                         <div className='flex justify-center'>
                             <motion.button

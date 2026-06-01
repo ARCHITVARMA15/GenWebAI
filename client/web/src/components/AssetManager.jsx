@@ -4,7 +4,7 @@ import { Check, Copy, ImageIcon, Loader2, Trash2, Upload, X } from 'lucide-react
 import axios from 'axios'
 import { serverUrl } from '../App'
 
-function AssetManager({ onClose }) {
+function AssetManager({ onClose, onSelect }) {
     const [assets, setAssets] = useState([])
     const [uploading, setUploading] = useState(false)
     const [dragOver, setDragOver] = useState(false)
@@ -74,6 +74,13 @@ function AssetManager({ onClose }) {
         navigator.clipboard.writeText(asset.url)
         setCopiedId(asset._id || asset.id)
         setTimeout(() => setCopiedId(null), 2000)
+    }
+
+    const handleSelect = (asset) => {
+        if (onSelect) {
+            onSelect(asset.url)
+            onClose()
+        }
     }
 
     const deleteAsset = async (asset) => {
@@ -203,14 +210,25 @@ function AssetManager({ onClose }) {
 
                                         {/* hover actions */}
                                         <div className='absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2'>
-                                            <button
-                                                onClick={() => copyUrl(asset)}
-                                                className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition'
-                                                style={{ background: isCopied ? '#16a34a' : '#4f46e5' }}
-                                            >
-                                                {isCopied ? <Check size={12} /> : <Copy size={12} />}
-                                                {isCopied ? 'Copied!' : 'Copy URL'}
-                                            </button>
+                                            {onSelect ? (
+                                                <button
+                                                    onClick={() => handleSelect(asset)}
+                                                    className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition'
+                                                    style={{ background: '#16a34a' }}
+                                                >
+                                                    <Check size={12} />
+                                                    Use Image
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => copyUrl(asset)}
+                                                    className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition'
+                                                    style={{ background: isCopied ? '#16a34a' : '#4f46e5' }}
+                                                >
+                                                    {isCopied ? <Check size={12} /> : <Copy size={12} />}
+                                                    {isCopied ? 'Copied!' : 'Copy URL'}
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={() => deleteAsset(asset)}
                                                 disabled={isDeleting}
@@ -230,7 +248,7 @@ function AssetManager({ onClose }) {
             {/* Footer hint */}
             <div className='px-4 py-3 border-t border-white/8 flex-shrink-0'>
                 <p className='text-[11px] text-zinc-600 text-center'>
-                    Copy a URL then paste it into your HTML or tell the AI to use it
+                    {onSelect ? 'Click an image to add it to your portfolio' : 'Copy a URL then paste it into your HTML or tell the AI to use it'}
                 </p>
             </div>
         </motion.div>

@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { serverUrl } from '../App'
 import { useState } from 'react'
-import { ArrowLeft, Bot, Code, Code2, Download, FlaskConical, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, Smartphone, X } from 'lucide-react'
+import { ArrowLeft, Bot, Code, Code2, Download, FlaskConical, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, Smartphone, Wand2, X } from 'lucide-react'
 import { useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import VersionHistoryPanel from '../components/VersionHistoryPanel'
@@ -29,6 +29,7 @@ function WebsiteEditor() {
     const [showHistory, setShowHistory] = useState(false)
     const [showAssets, setShowAssets] = useState(false)
     const [updateError, setUpdateError] = useState('')
+    const [optimizing, setOptimizing] = useState(false)
     const [mobileView, setMobileView] = useState(false)
     const [showWidget, setShowWidget] = useState(false)
     const [showExperiment, setShowExperiment] = useState(false)
@@ -39,6 +40,26 @@ function WebsiteEditor() {
         "Applying animations…",
         "Finalizing update…",
     ]
+    const handleOptimizePrompt = async () => {
+        if (!prompt.trim() || optimizing) return
+        setOptimizing(true)
+        try {
+            const res = await fetch(`${serverUrl}/api/website/optimize-prompt`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ prompt })
+            })
+            const data = await res.json()
+            if (res.ok) setPrompt(data.optimizedPrompt)
+            else setUpdateError(data.message || 'Optimization failed')
+        } catch {
+            setUpdateError('Prompt optimization failed')
+        } finally {
+            setOptimizing(false)
+        }
+    }
+
     const handleUpdate = async () => {
         if (!prompt) return
         setUpdateLoading(true)
@@ -173,6 +194,14 @@ function WebsiteEditor() {
                         {updateError && <p className='text-xs text-red-400 mb-2 px-1'>{updateError}</p>}
                         <div className='flex gap-2'>
                             <input placeholder='Describe Changes...' className='flex-1 resize-none rounded-2xl px-4 py-3 bg-white/5 border border-white/10 text-sm outline-none' onChange={(e) => setPrompt(e.target.value)} value={prompt} />
+                            <button
+                                onClick={handleOptimizePrompt}
+                                disabled={!prompt.trim() || optimizing}
+                                className='px-3 py-3 rounded-2xl border border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 transition disabled:opacity-40'
+                                title='Optimize prompt (5 credits)'
+                            >
+                                <Wand2 size={14} className={optimizing ? 'animate-pulse' : ''} />
+                            </button>
                             <button className='px-4 py-3 rounded-2xl bg-white text-black' disabled={updateLoading} onClick={handleUpdate}><Send size={14} /></button>
                         </div>
                     </div>
@@ -289,6 +318,14 @@ function WebsiteEditor() {
                     <div className='p-3 border-t border-white/10'>
                         <div className='flex gap-2'>
                             <input placeholder='Describe Changes...' className='flex-1 resize-none rounded-2xl px-4 py-3 bg-white/5 border border-white/10 text-sm outline-none' onChange={(e) => setPrompt(e.target.value)} value={prompt} />
+                            <button
+                                onClick={handleOptimizePrompt}
+                                disabled={!prompt.trim() || optimizing}
+                                className='px-3 py-3 rounded-2xl border border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 transition disabled:opacity-40'
+                                title='Optimize prompt (5 credits)'
+                            >
+                                <Wand2 size={14} className={optimizing ? 'animate-pulse' : ''} />
+                            </button>
                             <button className='px-4 py-3 rounded-2xl bg-white text-black' disabled={updateLoading} onClick={handleUpdate}><Send size={14} /></button>
                         </div>
                     </div>

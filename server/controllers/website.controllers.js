@@ -201,6 +201,39 @@ ABSOLUTE RULES
 
 `
 
+export const optimizePrompt = async (req, res) => {
+    try {
+        const { prompt } = req.body
+        if (!prompt?.trim()) return res.status(400).json({ message: 'prompt is required' })
+
+        const user = await User.findById(req.user._id)
+        if (!user) return res.status(400).json({ message: 'user not found' })
+        if (user.credits < 5) return res.status(400).json({ message: 'Not enough credits — prompt optimization requires 5 credits' })
+
+        const systemPrompt = `You are a senior prompt engineer specializing in AI website generation. Your task is to transform a casual website description into a precise, structured, technical generation prompt that produces dramatically better website output from an AI model.
+
+The optimized prompt must:
+- Define brand identity: specific color palette (hex codes), font pairings, visual tone
+- List every required section with specific content direction (not vague)
+- Specify layout decisions: hero type, navigation style, card layout, grid columns
+- Include design constraints: animation style, hover states, mobile behavior
+- Mention quality bar: "must feel like a $X,000 professional build"
+- Be 250-400 words, structured with labeled sections in ALL CAPS
+- Be written as a direct instruction to an AI system, not as a description
+
+Return ONLY the optimized prompt text. No explanation, no preamble, no markdown.`
+
+        const optimized = await generateResponse(prompt, null, systemPrompt)
+
+        user.credits -= 5
+        await user.save()
+
+        return res.status(200).json({ optimizedPrompt: optimized.trim(), remainingCredits: user.credits })
+    } catch (error) {
+        return res.status(500).json({ message: `optimize prompt error: ${error?.message || error}` })
+    }
+}
+
 export const generateWebsite = async (req, res) => {
     try{
       const { prompt, model: modelKey = 'gemini' } = req.body

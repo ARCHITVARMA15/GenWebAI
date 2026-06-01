@@ -17,6 +17,7 @@ import Toast from './components/Toast'
 import { setUserData } from './redux/userSlice'
 import GalleryPage from './pages/GalleryPage';
 import CloneWebsite from './components/CloneWebsite';
+import Portfolio from './pages/Portfolio';
 
 export const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
@@ -71,6 +72,7 @@ function App(){
         <Route path="/site/:id" element={<LiveSite />} />
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/clone" element={userData ? <CloneWebsite /> : <Home />} />
+        <Route path="/portfolio" element={userData ? <Portfolio /> : <Home />} />
       </Routes>
     </BrowserRouter>
   )
