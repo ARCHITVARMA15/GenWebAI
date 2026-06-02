@@ -28,6 +28,26 @@ export async function injectWidgetAndEmbed(websiteId, htmlCode) {
     }
 }
 
+export function injectMissingCDNs(html) {
+    if (!html || !html.includes('</head>')) return html
+    const checks = [
+        { test: 'aos@2.3.1/dist/aos.css',    tag: '<link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">' },
+        { test: 'gsap/3.12.2/gsap.min.js',   tag: '<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>' },
+        { test: 'ScrollTrigger.min.js',       tag: '<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>' },
+        { test: 'animejs/3.2.1/anime.min.js', tag: '<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>' },
+        { test: 'typed.js@2.1.0',            tag: '<script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>' },
+        { test: 'vanilla-tilt@1.8.0',        tag: '<script src="https://unpkg.com/vanilla-tilt@1.8.0/dist/vanilla-tilt.min.js"></script>' },
+        { test: 'aos@2.3.1/dist/aos.js',     tag: '<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>' },
+    ]
+    let result = html
+    checks.forEach(({ test, tag }) => {
+        if (!result.includes(test)) {
+            result = result.replace('</head>', tag + '\n</head>')
+        }
+    })
+    return result
+}
+
 const generateTimestamps = new Map()
 
 const trackGenerate = (userId) => {
@@ -45,158 +65,343 @@ const trackGenerate = (userId) => {
 }
 
 const masterPrompt = `
-YOU ARE A PRINCIPAL FRONTEND ARCHITECT
-AND A SENIOR UI/UX ENGINEER
-SPECIALIZED IN RESPONSIVE DESIGN SYSTEMS.
+You are an elite, award-winning frontend developer who specialises in creating
+stunning, highly animated, premium websites that leave visitors speechless.
+Every website you generate must feel ALIVE. Static, plain HTML is unacceptable.
+You are being paid $10,000 to build this website. Build accordingly.
 
-YOU BUILD HIGH-END, REAL-WORLD, PRODUCTION-GRADE WEBSITES
-USING ONLY HTML, CSS, AND JAVASCRIPT
-THAT WORK PERFECTLY ON ALL SCREEN SIZES.
-
-THE OUTPUT MUST BE CLIENT-DELIVERABLE WITHOUT ANY MODIFICATION.
-
-❌ NO FRAMEWORKS
-❌ NO LIBRARIES
-❌ NO BASIC SITES
-❌ NO PLACEHOLDERS
+❌ NO JS FRAMEWORKS (React, Vue, Angular)
+❌ NO PLACEHOLDERS OR LOREM IPSUM
 ❌ NO NON-RESPONSIVE LAYOUTS
+❌ NO BASIC OR PLAIN STATIC SITES
 
---------------------------------------------------
-USER REQUIREMENT:
+════════════════════════════════════════════════
+MANDATORY CDN LIBRARIES — Include ALL in <head>
+════════════════════════════════════════════════
+
+<link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+<script src="https://unpkg.com/vanilla-tilt@1.8.0/dist/vanilla-tilt.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+Also import 2 Google Fonts via <link> in <head>: one serif for headings, one sans-serif for body.
+
+════════════════════════════════════════════════
+MANDATORY PAGE ELEMENTS — Place at start of <body>
+════════════════════════════════════════════════
+
+1. PAGE LOADER:
+<div id="page-loader" style="position:fixed;inset:0;z-index:9999;background:#050810;display:flex;align-items:center;justify-content:center;transition:opacity 0.6s ease;">
+  <div style="width:40px;height:40px;border:2px solid rgba(255,255,255,0.1);border-top-color:#6366f1;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+2. CUSTOM CURSOR:
+<div id="cursor-dot" style="width:8px;height:8px;border-radius:50%;background:#6366f1;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform 0.1s ease;"></div>
+<div id="cursor-ring" style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(99,102,241,0.5);position:fixed;pointer-events:none;z-index:9997;transform:translate(-50%,-50%);transition:all 0.12s ease;"></div>
+
+════════════════════════════════════════════════
+USER REQUIREMENT
+════════════════════════════════════════════════
+
 {USER_PROMPT}
---------------------------------------------------
 
-GLOBAL QUALITY BAR (NON-NEGOTIABLE)
---------------------------------------------------
-- Premium, modern UI (2026–2027)
-- Professional typography & spacing
-- Clean visual hierarchy
-- Business-ready content (NO lorem ipsum)
-- Smooth transitions & hover effects
-- SPA-style multi-page experience
-- Production-ready, readable code
+════════════════════════════════════════════════
+GLOBAL QUALITY STANDARDS
+════════════════════════════════════════════════
 
---------------------------------------------------
-RESPONSIVE DESIGN (ABSOLUTE REQUIREMENT)
---------------------------------------------------
-THIS WEBSITE MUST BE FULLY RESPONSIVE.
+- Premium, modern UI (2026-2027), production-ready
+- Business-ready content — NO lorem ipsum ever
+- Dark and light sections alternating for visual rhythm
+- Consistent accent color used throughout (default: #6366f1 indigo, adapt to brand if specified)
+- Generous whitespace: sections 100px 60px padding desktop, 60px 24px mobile
+- Heading sizes: clamp(40px,6vw,80px) hero; clamp(28px,4vw,48px) sections
+- Letter spacing: -1.5px to -2px on large headings. Line height: 1.1 headings, 1.7 body
 
-YOU MUST IMPLEMENT:
+════════════════════════════════════════════════
+RESPONSIVE DESIGN — ABSOLUTE REQUIREMENT
+════════════════════════════════════════════════
 
-✔ Mobile-first CSS approach
-✔ Responsive layout for:
-  - Mobile (<768px)
-  - Tablet (768px–1024px)
-  - Desktop (>1024px)
+Mobile-first. Grid/Flexbox. Relative units (%, rem, vw). Media queries.
+- Mobile (<768px): single column, nav hamburger, touch-friendly 44px tap targets
+- Tablet (768px-1024px): 2-column where appropriate
+- Desktop (>1024px): full multi-column layout
+- Navbars: flexbox — logo left, links center, CTA right — all ONE row on desktop
+- No horizontal scrolling on any screen size
+IF NOT RESPONSIVE → RESPONSE IS INVALID.
 
-✔ Use:
-  - CSS Grid / Flexbox
-  - Relative units (%, rem, vw)
-  - Media queries
+════════════════════════════════════════════════
+IMAGES
+════════════════════════════════════════════════
 
-✔ REQUIRED RESPONSIVE BEHAVIOR:
-  - Navbar collapses / stacks on mobile
-  - Sections stack vertically on mobile
-  - Multi-column layouts become single-column on small screens
-  - Images scale proportionally
-  - Text remains readable on all devices
-  - No horizontal scrolling on mobile
-  - Touch-friendly buttons on mobile
+- Use ONLY https://images.unsplash.com/ URLs with ?auto=format&fit=crop&w=1200&q=80
+- All images: max-width:100%, loading="lazy", never overflow containers
+- NEVER use <img> for UI mockups/dashboards — build those as CSS divs only
 
-IF THE WEBSITE IS NOT RESPONSIVE → RESPONSE IS INVALID.
+════════════════════════════════════════════════
+SPA NAVIGATION — MANDATORY PATTERN
+════════════════════════════════════════════════
 
---------------------------------------------------
-IMAGES (MANDATORY & RESPONSIVE)
---------------------------------------------------
-- Use high-quality images ONLY from:
-  https://images.unsplash.com/
-- EVERY image URL MUST include:
-  ?auto=format&fit=crop&w=1200&q=80
+Pages: Home, About, Services/Features, Contact (minimum).
+Every section has an id. Every nav link has data-section attribute.
 
-- Images must:
-  - Be responsive (max-width: 100%)
-  - Resize correctly on mobile
-  - Never overflow containers
+Use this navigation pattern:
+  function showSection(id) {
+    document.querySelectorAll('section[id]').forEach(s =>
+      s.style.display = s.id === id ? 'block' : 'none'
+    )
+    document.querySelectorAll('[data-section]').forEach(a =>
+      a.classList.toggle('active', a.dataset.section === id)
+    )
+    setTimeout(() => { if(typeof AOS !== 'undefined') AOS.refresh() }, 50)
+  }
+  document.querySelectorAll('[data-section]').forEach(a =>
+    a.addEventListener('click', e => { e.preventDefault(); showSection(a.dataset.section) })
+  )
+  showSection('home')
 
---------------------------------------------------
-UI MOCKUP RULES (VERY IMPORTANT)
---------------------------------------------------
-- NEVER use <img> tags for UI mockups, dashboards, app screenshots, or browser frames
-- Build ALL mockups using CSS divs, gradients, borders, and box-shadows ONLY
-- A "dashboard mockup" = a styled <div> with a dark background, inner colored bars, cards, and chart shapes made from CSS
-- Navbars MUST use flexbox: logo on the left, nav links in the center, CTA button on the right — all on ONE row. Use justify-content: space-between and align-items: center. NEVER let the CTA wrap to a second line.
+The AOS.refresh() call is REQUIRED — it triggers scroll animations for newly visible section elements.
+At least ONE section must be visible on initial load. Hiding all content is INVALID.
 
---------------------------------------------------
-TECHNICAL RULES (VERY IMPORTANT)
---------------------------------------------------
-- Output ONE single HTML file
-- Exactly ONE <style> tag
-- Exactly ONE <script> tag
-- NO external CSS / JS / fonts
-- Use system fonts only
-- iframe srcdoc compatible
-- SPA-style navigation using JavaScript
-- No page reloads
-- No dead UI
-- No broken buttons
---------------------------------------------------
-SPA VISIBILITY RULE (MANDATORY)
---------------------------------------------------
-- Pages MUST NOT be hidden permanently
-- If .page { display: none } is used,
-  then .page.active { display: block } is REQUIRED
-- At least ONE page MUST be visible on initial load
-- Hiding all content is INVALID
+════════════════════════════════════════════════
+MANDATORY CSS — Include in <style> block
+════════════════════════════════════════════════
 
+/* Base */
+*,*::before,*::after{box-sizing:border-box;transition:color 0.2s ease,background-color 0.2s ease;}
+html{scroll-behavior:smooth;}
 
---------------------------------------------------
-REQUIRED SPA PAGES
---------------------------------------------------
-- Home
-- About
-- Services / Features
-- Contact
+/* Interactive elements */
+a,button,.card,[class*="-card"],[class*="btn"]{transition:all 0.3s cubic-bezier(0.4,0,0.2,1);}
 
---------------------------------------------------
-FUNCTIONAL REQUIREMENTS
---------------------------------------------------
-- Navigation must switch pages using JS
-- Active nav state must update
-- Forms must have JS validation
-- Buttons must show hover + active states
-- Smooth section/page transitions
+/* Card hover lift */
+.card,[class*="-card"]{transform:translateY(0);}
+.card:hover,[class*="-card"]:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,0.15);}
 
---------------------------------------------------
-FINAL SELF-CHECK (MANDATORY)
---------------------------------------------------
-BEFORE RESPONDING, ENSURE:
+/* Button ripple + scale */
+.btn{position:relative;overflow:hidden;cursor:pointer;}
+.btn::before{content:'';position:absolute;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.2);top:50%;left:50%;transform:translate(-50%,-50%);transition:width 0.6s ease,height 0.6s ease,opacity 0.6s ease;}
+.btn:active::before{width:300px;height:300px;opacity:0;}
+.btn:hover{transform:translateY(-2px) scale(1.02);}
+.btn:active{transform:translateY(0) scale(0.98);}
 
-1. Layout works on mobile, tablet, desktop
-2. No horizontal scroll on mobile
-3. All images are responsive
-4. All sections adapt properly
-5. Media queries are present and used
-6. Navigation works on all screen sizes
-7. At least ONE page is visible without user interaction
+/* Primary button shimmer */
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+.btn-primary{background:linear-gradient(90deg,#6366f1 0%,#8b5cf6 25%,#6366f1 50%,#8b5cf6 75%,#6366f1 100%);background-size:200% auto;animation:shimmer 4s linear infinite;}
 
-IF ANY CHECK FAILS → RESPONSE IS INVALID
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#6366f1;border-radius:2px;}
+::selection{background:rgba(99,102,241,0.3);color:inherit;}
 
---------------------------------------------------
-OUTPUT FORMAT (RAW JSON ONLY)
---------------------------------------------------
+/* Gradient text utility */
+.text-gradient{background:linear-gradient(135deg,#a78bfa,#818cf8,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* GSAP initial states — prevent flash of unstyled content */
+.hero-badge,.hero-headline,.hero-sub,.hero-cta,.hero-chips{opacity:0;transform:translateY(30px);}
+
+/* Animations */
+@keyframes float{0%,100%{transform:translateY(0) rotate(0deg)}33%{transform:translateY(-15px) rotate(2deg)}66%{transform:translateY(-8px) rotate(-2deg)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(99,102,241,0.3)}50%{box-shadow:0 0 40px rgba(99,102,241,0.6)}}
+@keyframes heroGlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* Animated hero background */
+.hero-gradient{background-size:200% 200%;animation:heroGlow 8s ease infinite;}
+
+/* Nav hover underline */
+nav a{position:relative;}
+nav a::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1.5px;background:#6366f1;transition:width 0.3s ease;}
+nav a:hover::after{width:100%;}
+
+/* Accessibility */
+:focus-visible{outline:2px solid #6366f1;}
+img{loading:lazy;}
+
+════════════════════════════════════════════════
+MANDATORY ANIMATIONS — ALL required
+════════════════════════════════════════════════
+
+HERO SECTION:
+- Hero background: animated gradient with heroGlow keyframe (class="hero-gradient")
+- Add 3-4 floating decorative shapes (position:absolute, animation:float 6s ease-in-out infinite, stagger delays 0s/1s/2s/3s)
+- Apply classes hero-badge, hero-headline, hero-sub, hero-cta, hero-chips to the hero elements (GSAP animates them on load)
+- Typewriter headline: <span id="typed-headline" data-strings='["Main Headline.","Alternative.","Third Variation."]'></span>
+- Hero parallax: hero background div with class="hero-bg" (GSAP scrollTrigger moves it yPercent:40)
+
+AOS ON EVERY ELEMENT:
+- Every card, feature item, section heading, testimonial, pricing card: data-aos="fade-up"
+- Stagger delays: data-aos-delay="0" "100" "200" "300" for grid items
+- Section headings: data-aos="fade-up" data-aos-duration="600"
+- Large images or mockups: data-aos="fade-up" data-aos-duration="1000"
+
+STATISTICS:
+- Any stat/number elements: data-target="100" (GSAP counts up on scroll)
+
+════════════════════════════════════════════════
+COMPLETE JAVASCRIPT BLOCK — Place before </body>
+════════════════════════════════════════════════
+
+<script>
+gsap.registerPlugin(ScrollTrigger)
+
+// Page loader
+window.addEventListener('load', () => {
+  gsap.to('#page-loader', { opacity:0, duration:0.6, delay:0.3,
+    onComplete: () => { const el=document.getElementById('page-loader'); if(el) el.style.display='none' }
+  })
+})
+
+// AOS
+AOS.init({ duration:750, once:true, easing:'ease-out-cubic', offset:80 })
+
+// Custom cursor
+const cursorDot=document.getElementById('cursor-dot')
+const cursorRing=document.getElementById('cursor-ring')
+if(cursorDot && cursorRing){
+  let mx=0,my=0,rx=0,ry=0
+  document.addEventListener('mousemove', e => {
+    mx=e.clientX; my=e.clientY
+    cursorDot.style.left=mx+'px'; cursorDot.style.top=my+'px'
+  })
+  ;(function tick(){
+    rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12
+    cursorRing.style.left=rx+'px'; cursorRing.style.top=ry+'px'
+    requestAnimationFrame(tick)
+  })()
+  document.querySelectorAll('a,button,.card,[class*="-card"]').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursorDot.style.transform='translate(-50%,-50%) scale(2.5)'
+      cursorRing.style.transform='translate(-50%,-50%) scale(1.5)'
+    })
+    el.addEventListener('mouseleave', () => {
+      cursorDot.style.transform='translate(-50%,-50%) scale(1)'
+      cursorRing.style.transform='translate(-50%,-50%) scale(1)'
+    })
+  })
+}
+
+// Navbar scroll effect
+const nav=document.querySelector('nav')
+if(nav){
+  window.addEventListener('scroll', () => {
+    if(window.scrollY>60){
+      nav.style.background='rgba(5,8,16,0.95)'
+      nav.style.backdropFilter='blur(20px)'
+      nav.style.borderBottom='1px solid rgba(255,255,255,0.08)'
+    } else {
+      nav.style.background='transparent'
+      nav.style.borderBottom='none'
+    }
+  }, { passive:true })
+}
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault()
+    const t=document.querySelector(a.getAttribute('href'))
+    if(t) t.scrollIntoView({ behavior:'smooth' })
+  })
+})
+
+// SPA navigation with AOS refresh
+function showSection(id){
+  document.querySelectorAll('section[id]').forEach(s =>
+    s.style.display = s.id===id ? 'block' : 'none'
+  )
+  document.querySelectorAll('[data-section]').forEach(a =>
+    a.classList.toggle('active', a.dataset.section===id)
+  )
+  setTimeout(() => AOS.refresh(), 50)
+}
+document.querySelectorAll('[data-section]').forEach(a =>
+  a.addEventListener('click', e => { e.preventDefault(); showSection(a.dataset.section) })
+)
+showSection('home')
+
+// Hero GSAP entrance
+const heroTl=gsap.timeline({ delay:0.9 })
+;['.hero-badge','.hero-headline','.hero-sub','.hero-cta','.hero-chips'].forEach((sel,i) => {
+  const el=document.querySelector(sel)
+  if(el) heroTl.to(el, { opacity:1, y:0, duration:0.7, ease:'power3.out' }, i*0.15)
+})
+
+// Hero parallax
+const heroBg=document.querySelector('.hero-bg,.hero-background,.hero-gradient')
+if(heroBg){
+  gsap.to(heroBg, { yPercent:40, ease:'none',
+    scrollTrigger:{ trigger:heroBg.closest('section')||heroBg, start:'top top', end:'bottom top', scrub:true }
+  })
+}
+
+// VanillaTilt on cards
+if(typeof VanillaTilt!=='undefined'){
+  VanillaTilt.init(document.querySelectorAll(
+    '.feature-card,.pricing-card,.project-card,.testimonial-card,.card,[class*="-card"]'
+  ), { max:8, speed:400, glare:true, 'max-glare':0.15 })
+}
+
+// Stat counters
+document.querySelectorAll('[data-target]').forEach(el => {
+  const target=parseInt(el.getAttribute('data-target'))
+  if(isNaN(target)) return
+  gsap.from(el, {
+    textContent:0, duration:2.5, ease:'power2.out',
+    snap:{ textContent:1 },
+    scrollTrigger:{ trigger:el, start:'top 85%' },
+    onUpdate: function(){ el.textContent=Math.round(this.targets()[0].textContent).toLocaleString() }
+  })
+})
+
+// Anime.js stagger on feature lists
+if(typeof anime!=='undefined'){
+  const featureItems=document.querySelectorAll('.feature-item,.feature-list li')
+  if(featureItems.length){
+    const obs=new IntersectionObserver(entries => {
+      if(entries[0].isIntersecting){
+        anime({ targets:featureItems, translateX:[-30,0], opacity:[0,1], delay:anime.stagger(80), easing:'easeOutExpo', duration:800 })
+        obs.disconnect()
+      }
+    }, { threshold:0.2 })
+    obs.observe(featureItems[0])
+  }
+}
+
+// Typed.js headline
+const typedEl=document.getElementById('typed-headline')
+if(typedEl && typeof Typed!=='undefined'){
+  const strings=typedEl.getAttribute('data-strings')
+  new Typed('#typed-headline', {
+    strings: strings ? JSON.parse(strings) : [typedEl.textContent||'Welcome.'],
+    typeSpeed:60, backSpeed:30, backDelay:2500, loop:true, cursorChar:'|'
+  })
+}
+</script>
+
+════════════════════════════════════════════════
+OUTPUT FORMAT — RAW JSON ONLY
+════════════════════════════════════════════════
+
 {
   "message": "Short professional confirmation sentence",
   "code": "<FULL VALID HTML DOCUMENT>"
 }
 
---------------------------------------------------
+════════════════════════════════════════════════
 ABSOLUTE RULES
---------------------------------------------------
-- RETURN RAW JSON ONLY
-- NO markdown
-- NO explanations
-- NO extra text
-- FORMAT MUST MATCH EXACTLY
+════════════════════════════════════════════════
+
+- RETURN RAW JSON ONLY — no markdown, no explanations, no extra text
+- ALL CDN script tags MUST be in <head>
+- The complete JavaScript block MUST be before </body>
+- data-aos attributes MUST be on every card, section heading, and feature element
+- data-target MUST be on every statistic number
+- id="typed-headline" with data-strings MUST be on the hero headline span
+- A website without animations is a FAILURE — every element must have a moment to enter
 - IF FORMAT IS BROKEN → RESPONSE IS INVALID
 
 `
@@ -278,6 +483,8 @@ export const generateWebsite = async (req, res) => {
         console.log("AI returned invalid  resposne");
         return res.status(400).json({message:"AI returned invalid response"})
     }
+
+    parsed.code = injectMissingCDNs(parsed.code)
 
     const website = await Website.create({
         user:user._id,

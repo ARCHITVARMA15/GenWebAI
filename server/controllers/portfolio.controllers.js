@@ -5,7 +5,7 @@ import portfolioDesigns from '../config/portfolioDesigns.js'
 import Website from '../models/website.model.js'
 import User from '../models/user.model.js'
 import extractJson from '../utils/extractJson.js'
-import { injectWidgetAndEmbed } from './website.controllers.js'
+import { injectWidgetAndEmbed, injectMissingCDNs } from './website.controllers.js'
 
 const PORTFOLIO_CREDITS = 30
 
@@ -217,37 +217,113 @@ ${linkedinSummary ? `${certsBlock ? '7' : '6'}. EXPERIENCE (from LinkedIn summar
 CONTACT (GitHub link, email, contact form)
 
 ==================================================
+MANDATORY CDN LIBRARIES — Include ALL in <head>
+==================================================
+<link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+<script src="https://unpkg.com/vanilla-tilt@1.8.0/dist/vanilla-tilt.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+==================================================
+MANDATORY PAGE ELEMENTS — Add at start of <body>
+==================================================
+1. Page loader: <div id="page-loader" style="position:fixed;inset:0;z-index:9999;background:#050810;display:flex;align-items:center;justify-content:center;"><div style="width:40px;height:40px;border:2px solid rgba(255,255,255,0.1);border-top-color:#6366f1;border-radius:50%;animation:spin 0.8s linear infinite;"></div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+2. Custom cursor: <div id="cursor-dot" style="width:8px;height:8px;border-radius:50%;background:var(--accent,#6366f1);position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform 0.1s ease;"></div><div id="cursor-ring" style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(99,102,241,0.5);position:fixed;pointer-events:none;z-index:9997;transform:translate(-50%,-50%);transition:all 0.12s ease;"></div>
+
+==================================================
 TECHNICAL REQUIREMENTS
 ==================================================
-- ONE HTML file, ONE <style> tag (at top), ONE <script> tag (at bottom)
+- ONE HTML file, CDN <script> tags in <head>, ONE inline <script> block before </body>
 - Fully responsive: mobile hamburger menu, grid collapses to 1 column on mobile
 - Project GitHub links: target="_blank" rel="noopener noreferrer"
 - No Lorem Ipsum — only real provided data
-- No external JS libraries — vanilla CSS and JS only
-- iframe-compatible: no scripts that block rendering
+
+HERO STRUCTURE (MANDATORY):
+- Split person's name into individual letters: <h1><span class="name-letter">J</span><span class="name-letter">o</span>...</h1>
+- Role typewriter: <span id="typed-role" data-strings='["${title || 'Software Developer.'}","Problem Solver.","Builder."]'></span>
+- Profile photo (if provided): class="profile-photo" on <img> tag
+
+AOS ON EVERY ELEMENT:
+- data-aos="fade-up" on every card, section heading, skill pill, cert card
+- Stagger delays: data-aos-delay="0" "100" "200" "300" for grid items
+- data-aos="fade-left" for experience timeline items
+
+STAT NUMBERS: data-target="47" on each GitHub stat number (GSAP counts up)
+SKILL BARS: <div class="skill-bar" data-width="85%"></div> inside a .skill-bar-bg wrapper
+TIMELINE: vertical line with class="timeline-line" inside div class="timeline-container"
+PROJECT CARDS: class="project-card", tech stack pills class="tech-pill" inside each card
+SOCIAL LINKS: class="social-link" on each social icon link
+CONTACT SECTION: class="contact-section", main CTA text class="contact-cta"
+
+SCROLLING TECH MARQUEE (between skills and projects):
+<div style="overflow:hidden;white-space:nowrap;padding:20px 0;">
+  <div class="marquee-track" style="display:inline-block;animation:marquee 20s linear infinite;">[all tech names as pills, repeated twice]</div>
+</div>
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 
 SPA NAVIGATION — COPY THIS EXACT PATTERN:
-Give every section an id like: <section id="home">, <section id="about">, <section id="projects">, <section id="skills">, <section id="contact"> etc.
+Give every section an id: <section id="home">, <section id="about">, <section id="projects">, <section id="skills">, <section id="contact">
 Give every nav link a data-section attribute: <a data-section="about" href="#">About</a>
 
-Use this EXACT JavaScript in the <script> tag:
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('[data-section]');
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('[data-section]');
+function showSection(id) {
+  sections.forEach(s => s.style.display = s.id === id ? 'block' : 'none');
+  navLinks.forEach(a => a.classList.toggle('active', a.dataset.section === id));
+  setTimeout(() => AOS.refresh(), 50);
+}
+navLinks.forEach(a => a.addEventListener('click', e => { e.preventDefault(); showSection(a.dataset.section); }));
+showSection('home');
 
-  function showSection(id) {
-    sections.forEach(s => s.style.display = s.id === id ? 'block' : 'none');
-    navLinks.forEach(a => {
-      if (a.dataset.section === id) { a.classList.add('active'); }
-      else { a.classList.remove('active'); }
-    });
-  }
-
-  navLinks.forEach(a => a.addEventListener('click', e => {
-    e.preventDefault();
-    showSection(a.dataset.section);
-  }));
-
-  showSection('home');   // show home by default on load
+COMPLETE JAVASCRIPT BLOCK — Place before </body>:
+<script>
+gsap.registerPlugin(ScrollTrigger)
+window.addEventListener('load', () => {
+  gsap.to('#page-loader', { opacity:0, duration:0.6, delay:0.2,
+    onComplete: () => { const el=document.getElementById('page-loader'); if(el) el.style.display='none' }
+  })
+})
+AOS.init({ duration:800, once:true, easing:'ease-out-cubic', offset:60 })
+const dot=document.getElementById('cursor-dot'), ring=document.getElementById('cursor-ring')
+if(dot && ring){
+  let mx=0,my=0,rx=0,ry=0
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px'})
+  ;(function tick(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(tick)})()
+  document.querySelectorAll('a,button,.project-card,.card').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{dot.style.transform='translate(-50%,-50%) scale(3)';ring.style.transform='translate(-50%,-50%) scale(1.6)'})
+    el.addEventListener('mouseleave',()=>{dot.style.transform='translate(-50%,-50%) scale(1)';ring.style.transform='translate(-50%,-50%) scale(1)'})
+  })
+}
+const nav=document.querySelector('nav')
+if(nav){ window.addEventListener('scroll',()=>{ nav.style.background=window.scrollY>50?'rgba(5,8,16,0.95)':'transparent'; nav.style.backdropFilter=window.scrollY>50?'blur(20px)':'none' },{passive:true}) }
+const sections=document.querySelectorAll('section[id]'), navLinks=document.querySelectorAll('[data-section]')
+function showSection(id){ sections.forEach(s=>s.style.display=s.id===id?'block':'none'); navLinks.forEach(a=>a.classList.toggle('active',a.dataset.section===id)); setTimeout(()=>AOS.refresh(),50) }
+navLinks.forEach(a=>a.addEventListener('click',e=>{e.preventDefault();showSection(a.dataset.section)}))
+showSection('home')
+gsap.from('.name-letter',{opacity:0,y:80,rotateX:90,transformOrigin:'top center',stagger:0.04,duration:0.7,ease:'back.out(1.7)',delay:0.8})
+const typedRole=document.getElementById('typed-role')
+if(typedRole && typeof Typed!=='undefined'){ new Typed('#typed-role',{ strings:JSON.parse(typedRole.getAttribute('data-strings')||'["Developer."]'), typeSpeed:70, backSpeed:40, backDelay:2000, loop:true }) }
+gsap.utils.toArray('.skill-bar').forEach(bar=>{ gsap.to(bar,{width:bar.getAttribute('data-width')||'80%',duration:1.5,ease:'power3.out',scrollTrigger:{trigger:bar,start:'top 85%'}}) })
+gsap.to('.timeline-line',{height:'100%',ease:'none',scrollTrigger:{trigger:'.timeline-container',start:'top 70%',end:'bottom 30%',scrub:0.5}})
+if(typeof VanillaTilt!=='undefined'){
+  VanillaTilt.init(document.querySelectorAll('.project-card'),{max:12,speed:300,glare:true,'max-glare':0.25})
+  VanillaTilt.init(document.querySelectorAll('.cert-card,.stat-card'),{max:6,speed:400,glare:false})
+}
+document.querySelectorAll('[data-target]').forEach(el=>{ const t=parseInt(el.getAttribute('data-target')); if(isNaN(t)) return; gsap.from(el,{textContent:0,duration:2.5,ease:'power2.out',snap:{textContent:1},scrollTrigger:{trigger:el,start:'top 85%'},onUpdate:function(){el.textContent=Math.round(this.targets()[0].textContent).toLocaleString()}}) })
+gsap.from('.about-text p,.about-text li',{opacity:0,y:30,duration:0.8,stagger:0.12,ease:'power3.out',scrollTrigger:{trigger:'.about-section',start:'top 70%'}})
+gsap.from('.profile-photo',{scale:0.8,opacity:0,duration:1,ease:'back.out(1.7)',scrollTrigger:{trigger:'.about-section',start:'top 70%'}})
+gsap.from('.contact-cta',{scale:0.9,opacity:0,duration:1,ease:'power3.out',scrollTrigger:{trigger:'.contact-section',start:'top 70%'}})
+if(typeof anime!=='undefined'){
+  const certEl=document.querySelector('.cert-card')
+  if(certEl){ new IntersectionObserver(entries=>{ if(entries[0].isIntersecting) anime({targets:'.cert-card',translateY:[40,0],opacity:[0,1],delay:anime.stagger(100),easing:'easeOutExpo',duration:700}) },{threshold:0.2}).observe(certEl) }
+  document.querySelectorAll('.project-card').forEach(card=>{ card.addEventListener('mouseenter',()=>anime({targets:card.querySelectorAll('.tech-pill'),scale:[0.8,1],opacity:[0.5,1],delay:anime.stagger(40),duration:300,easing:'easeOutBack'})) })
+  const socials=document.querySelectorAll('.social-link')
+  if(socials.length) anime({targets:socials,scale:[0,1],opacity:[0,1],delay:anime.stagger(100),easing:'easeOutBack',duration:600})
+}
+</script>
 
 ==================================================
 OUTPUT — RAW JSON ONLY
@@ -394,6 +470,8 @@ export const generatePortfolio = async (req, res) => {
         }
 
         if (!parsed?.code) { send({ error: 'AI returned an invalid response — please try again' }); return }
+
+        parsed.code = injectMissingCDNs(parsed.code)
 
         const website = await Website.create({
             user: user._id,
