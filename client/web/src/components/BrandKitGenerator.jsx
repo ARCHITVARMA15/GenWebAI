@@ -344,7 +344,7 @@ function BrandKitGenerator() {
                                 <iframe
                                     srcDoc={adjustedHtml || htmlContent}
                                     className='flex-1 w-full bg-white'
-                                    sandbox='allow-scripts'
+                                    sandbox='allow-scripts allow-popups allow-popups-to-escape-sandbox'
                                     title='Brand website mobile preview'
                                 />
                             </div>
@@ -352,7 +352,7 @@ function BrandKitGenerator() {
                             <iframe
                                 srcDoc={adjustedHtml || htmlContent}
                                 className="absolute inset-0 w-full h-full bg-white"
-                                sandbox="allow-scripts"
+                                sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
                                 title="Brand website preview"
                             />
                         )}

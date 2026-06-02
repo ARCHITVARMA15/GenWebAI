@@ -4,13 +4,14 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { serverUrl } from '../App'
 import { useState } from 'react'
-import { ArrowLeft, Bot, Code, Code2, Download, FlaskConical, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, Smartphone, Wand2, X } from 'lucide-react'
+import { ArrowLeft, Bot, Code, Code2, Download, FlaskConical, History, ImageIcon, MessageCircle, MessageSquare, Monitor, Rocket, Send, Smartphone, Wand2, X, Link2 } from 'lucide-react'
 import { useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import VersionHistoryPanel from '../components/VersionHistoryPanel'
 import AssetManager from '../components/AssetManager'
 import ChatWidgetPanel from '../components/ChatWidgetPanel'
 import ExperimentPanel from '../components/ExperimentPanel'
+import IntegrationsPanel from '../components/IntegrationsPanel'
 
 import Editor from '@monaco-editor/react';
 function WebsiteEditor() {
@@ -33,6 +34,7 @@ function WebsiteEditor() {
     const [mobileView, setMobileView] = useState(false)
     const [showWidget, setShowWidget] = useState(false)
     const [showExperiment, setShowExperiment] = useState(false)
+    const [showIntegrations, setShowIntegrations] = useState(false)
     const thinkingSteps = [
         "Understanding your request…",
         "Planning layout changes…",
@@ -60,15 +62,15 @@ function WebsiteEditor() {
         }
     }
 
-    const handleUpdate = async () => {
-        if (!prompt) return
+    const handleUpdate = async (overridePrompt) => {
+        const textToUse = typeof overridePrompt === 'string' ? overridePrompt : prompt
+        if (!textToUse) return
         setUpdateLoading(true)
-        const text = prompt
         setPrompt("")
-        setMessages((m) => [...m, { role: "user", content: prompt }])
+        setMessages((m) => [...m, { role: "user", content: textToUse }])
         try {
             setUpdateError('')
-            const result = await axios.post(`${serverUrl}/api/website/update/${id}`, { prompt: text }, { withCredentials: true })
+            const result = await axios.post(`${serverUrl}/api/website/update/${id}`, { prompt: textToUse }, { withCredentials: true })
             setUpdateLoading(false)
             setMessages((m) => [...m, { role: "ai", content: result.data.message }])
             setCode(result.data.code)
@@ -223,6 +225,7 @@ function WebsiteEditor() {
                         <button className='p-2 text-zinc-400 hover:text-white transition' onClick={handleDownload} title="Download HTML"><Download size={18} /></button>
                         <button className={`p-2 rounded-lg transition ${showWidget ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white'}`} onClick={() => setShowWidget(v => !v)} title='Chat Widget'><Bot size={18} /></button>
                         <button className={`p-2 rounded-lg transition ${showExperiment ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white'}`} onClick={() => setShowExperiment(v => !v)} title='A/B Testing'><FlaskConical size={18} /></button>
+                        <button className={`p-2 rounded-lg transition ${showIntegrations ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white'}`} onClick={() => setShowIntegrations(v => !v)} title='Map & Socials'><Link2 size={18} /></button>
                         <button className='p-2' onClick={() => setShowHistory((v) => !v)} title="Version History"><History size={18} /></button>
                         <button className='p-2' onClick={() => setShowAssets((v) => !v)} title="Image Assets"><ImageIcon size={18} /></button>
                         <button
@@ -242,10 +245,10 @@ function WebsiteEditor() {
                             <div className='h-7 bg-zinc-800 shrink-0 flex items-center justify-center'>
                                 <div className='w-20 h-1.5 rounded-full bg-zinc-600' />
                             </div>
-                            <iframe ref={iframeRef} sandbox='allow-scripts allow-same-origin allow-forms' className='flex-1 w-full bg-white' />
+                            <iframe ref={iframeRef} sandbox='allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation' className='flex-1 w-full bg-white' />
                         </div>
                     ) : (
-                        <iframe ref={iframeRef} sandbox='allow-scripts allow-same-origin allow-forms' className='flex-1 w-full bg-white' />
+                        <iframe ref={iframeRef} sandbox='allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation' className='flex-1 w-full bg-white' />
                     )}
                 </div>
             </div>
@@ -271,6 +274,16 @@ function WebsiteEditor() {
                     </div>
                     <ExperimentPanel websiteId={website._id} />
                 </aside>
+            )}
+
+            {showIntegrations && website && (
+                <IntegrationsPanel
+                    onClose={() => setShowIntegrations(false)}
+                    isLoading={updateLoading}
+                    onApplyIntegrations={(promptText) => {
+                        handleUpdate(promptText)
+                    }}
+                />
             )}
 
             <AnimatePresence>
@@ -383,7 +396,7 @@ function WebsiteEditor() {
                     <motion.div
                         className="fixed inset-0 z-[9999] bg-black"
                     >
-                        <iframe className='w-full h-full bg-white' srcDoc={code} sandbox='allow-scripts allow-same-origin allow-forms'/>
+                        <iframe className='w-full h-full bg-white' srcDoc={code} sandbox='allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox'/>
                         <button onClick={() => setShowFullPreview(false)} className='absolute top-4 right-4 p-2 bg-black/70 rounded-lg'><X /></button>
                     </motion.div>
                 )}

@@ -370,7 +370,7 @@ function Generate() {
                                 <iframe
                                     srcDoc={streamedContent}
                                     className='w-full h-full bg-white'
-                                    sandbox='allow-scripts'
+                                    sandbox='allow-scripts allow-popups allow-popups-to-escape-sandbox'
                                     title='Live preview'
                                 />
                             </div>
