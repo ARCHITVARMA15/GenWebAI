@@ -440,28 +440,6 @@ function Home() {
             }}>
 
               {/* Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.0 }}
-                style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}
-              >
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '8px',
-                  padding: '6px 18px',
-                  borderRadius: '999px',
-                  border: '1px solid rgba(139,92,246,.5)',
-                  background: 'rgba(139,92,246,.18)',
-                  fontSize: '12px', fontWeight: 600, color: '#ddd6fe',
-                  backdropFilter: 'blur(8px)',
-                  letterSpacing: '0.05em',
-                  textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#a78bfa', boxShadow: '0 0 10px #a78bfa' }} />
-                  Now with Vision Clone & Brand Kit
-                  <Sparkles size={12} />
-                </span>
-              </motion.div>
 
               {/* Main headline */}
               <motion.h1
