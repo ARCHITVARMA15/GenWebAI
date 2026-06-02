@@ -201,8 +201,7 @@ a,button,.card,[class*="-card"],[class*="btn"]{transition:all 0.3s cubic-bezier(
 /* Gradient text utility */
 .text-gradient{background:linear-gradient(135deg,#a78bfa,#818cf8,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 
-/* GSAP initial states — prevent flash of unstyled content */
-.hero-badge,.hero-headline,.hero-sub,.hero-cta,.hero-chips{opacity:0;transform:translateY(30px);}
+/* GSAP initial states set via gsap.set() in JS — NOT CSS — so elements stay visible if GSAP fails to load */
 
 /* Animations */
 @keyframes float{0%,100%{transform:translateY(0) rotate(0deg)}33%{transform:translateY(-15px) rotate(2deg)}66%{transform:translateY(-8px) rotate(-2deg)}}
@@ -308,27 +307,29 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   })
 })
 
-// SPA navigation with AOS refresh
+// SPA navigation with AOS refresh + fallback for misnamed first section
 function showSection(id){
-  document.querySelectorAll('section[id]').forEach(s =>
-    s.style.display = s.id===id ? 'block' : 'none'
+  const all=document.querySelectorAll('section[id]')
+  const target=document.getElementById(id)
+  all.forEach(s=>s.style.display=(target?s.id===id:s===all[0])?'block':'none')
+  document.querySelectorAll('[data-section]').forEach(a=>
+    a.classList.toggle('active',a.dataset.section===id)
   )
-  document.querySelectorAll('[data-section]').forEach(a =>
-    a.classList.toggle('active', a.dataset.section===id)
-  )
-  setTimeout(() => AOS.refresh(), 50)
+  setTimeout(()=>{ if(typeof AOS!=='undefined') AOS.refresh() },50)
 }
-document.querySelectorAll('[data-section]').forEach(a =>
-  a.addEventListener('click', e => { e.preventDefault(); showSection(a.dataset.section) })
+document.querySelectorAll('[data-section]').forEach(a=>
+  a.addEventListener('click',e=>{ e.preventDefault(); showSection(a.dataset.section) })
 )
+// Show home section, fallback to first section if id="home" not found
 showSection('home')
 
-// Hero GSAP entrance
-const heroTl=gsap.timeline({ delay:0.9 })
-;['.hero-badge','.hero-headline','.hero-sub','.hero-cta','.hero-chips'].forEach((sel,i) => {
-  const el=document.querySelector(sel)
-  if(el) heroTl.to(el, { opacity:1, y:0, duration:0.7, ease:'power3.out' }, i*0.15)
-})
+// Hero GSAP entrance — set initial state via JS not CSS so fallback is visible
+const heroEls=document.querySelectorAll('.hero-badge,.hero-headline,.hero-sub,.hero-cta,.hero-chips')
+if(heroEls.length && typeof gsap!=='undefined'){
+  gsap.set(heroEls,{opacity:0,y:30})
+  const heroTl=gsap.timeline({delay:0.9})
+  heroEls.forEach((el,i)=>heroTl.to(el,{opacity:1,y:0,duration:0.7,ease:'power3.out'},i*0.15))
+}
 
 // Hero parallax
 const heroBg=document.querySelector('.hero-bg,.hero-background,.hero-gradient')

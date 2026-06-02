@@ -300,10 +300,10 @@ if(dot && ring){
 const nav=document.querySelector('nav')
 if(nav){ window.addEventListener('scroll',()=>{ nav.style.background=window.scrollY>50?'rgba(5,8,16,0.95)':'transparent'; nav.style.backdropFilter=window.scrollY>50?'blur(20px)':'none' },{passive:true}) }
 const sections=document.querySelectorAll('section[id]'), navLinks=document.querySelectorAll('[data-section]')
-function showSection(id){ sections.forEach(s=>s.style.display=s.id===id?'block':'none'); navLinks.forEach(a=>a.classList.toggle('active',a.dataset.section===id)); setTimeout(()=>AOS.refresh(),50) }
+function showSection(id){ const target=document.getElementById(id); sections.forEach(s=>s.style.display=(target?s.id===id:s===sections[0])?'block':'none'); navLinks.forEach(a=>a.classList.toggle('active',a.dataset.section===id)); setTimeout(()=>AOS.refresh(),50) }
 navLinks.forEach(a=>a.addEventListener('click',e=>{e.preventDefault();showSection(a.dataset.section)}))
 showSection('home')
-gsap.from('.name-letter',{opacity:0,y:80,rotateX:90,transformOrigin:'top center',stagger:0.04,duration:0.7,ease:'back.out(1.7)',delay:0.8})
+if(typeof gsap!=='undefined') gsap.from('.name-letter',{opacity:0,y:80,rotateX:90,transformOrigin:'top center',stagger:0.04,duration:0.7,ease:'back.out(1.7)',delay:0.8})
 const typedRole=document.getElementById('typed-role')
 if(typedRole && typeof Typed!=='undefined'){ new Typed('#typed-role',{ strings:JSON.parse(typedRole.getAttribute('data-strings')||'["Developer."]'), typeSpeed:70, backSpeed:40, backDelay:2000, loop:true }) }
 gsap.utils.toArray('.skill-bar').forEach(bar=>{ gsap.to(bar,{width:bar.getAttribute('data-width')||'80%',duration:1.5,ease:'power3.out',scrollTrigger:{trigger:bar,start:'top 85%'}}) })
