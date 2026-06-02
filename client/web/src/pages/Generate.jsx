@@ -87,6 +87,7 @@
 
 
 import { ArrowLeft, Lock, Sparkles, Wand2, X, Zap } from 'lucide-react'
+import ShapeGrid from '../components/ShapeGrid'
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from "motion/react"
@@ -235,6 +236,9 @@ function Generate() {
 
     return (
         <div className='min-h-screen bg-linear-to-br from-[#050505] via-[#0b0b0b] to-[#050505] text-white'>
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <ShapeGrid speed={0.5} squareSize={40} direction="diagonal" borderColor="#2f293a" hoverFillColor="#222" shape="square" hoverTrailAmount={0} />
+            </div>
             <div className='sticky top-0 z-40 backdrop-blur-xl bg-black/50 border-b border-white/10'>
                 <div className='max-w-7xl mx-auto px-6 h-16 flex items-center justify-between'>
                     <div className='flex items-center gap-4'>
@@ -257,9 +261,11 @@ function Generate() {
                 </div>
             </div>
 
-            <div className='max-w-6xl mx-auto px-6 py-16'>
+            <div className='max-w-6xl mx-auto px-6 py-8 relative z-[1]'>
                 {mode === 'brand' ? (
-                    <BrandKitGenerator />
+                    <div className='min-h-[calc(100vh-128px)] flex flex-col justify-center'>
+                        <BrandKitGenerator />
+                    </div>
                 ) : (<>
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
                     <h1 className='text-4xl md:text-5xl font-bold mb-5 leading-tight'>
@@ -288,10 +294,10 @@ function Generate() {
                                                 disabled={!m.isAvailable}
                                                 className={`relative text-left p-4 rounded-2xl border transition ${
                                                     !m.isAvailable
-                                                        ? 'border-white/5 bg-white/3 opacity-50 cursor-not-allowed'
+                                                        ? 'border-white/5 bg-zinc-950 opacity-50 cursor-not-allowed'
                                                         : isSelected
-                                                            ? 'border-indigo-500/60 bg-indigo-500/10'
-                                                            : 'border-white/10 bg-white/5 hover:bg-white/8 cursor-pointer'
+                                                            ? 'border-indigo-500/60 bg-indigo-950'
+                                                            : 'border-white/10 bg-zinc-900 hover:bg-zinc-800 cursor-pointer'
                                                 }`}
                                             >
                                                 <div className='flex items-start justify-between gap-2 mb-1.5'>
@@ -332,7 +338,7 @@ function Generate() {
                                 onChange={(e) => setPrompt(e.target.value)}
                                 value={prompt}
                                 placeholder='Describe your website in detail...'
-                                className='w-full h-56 p-6 rounded-3xl bg-black/60 border border-white/10 outline-none resize-none text-sm leading-relaxed focus:ring-2 focus:ring-white/20'
+                                className='w-full h-56 p-6 rounded-3xl bg-zinc-900 border border-white/10 outline-none resize-none text-sm leading-relaxed focus:ring-2 focus:ring-white/20'
                             />
                             <p className='text-[11px] text-zinc-600 mt-1.5 text-right'>✨ Optimize rewrites your prompt for better output — 5 credits</p>
                             {error && <p className='mt-3 text-sm text-red-400'>{error}</p>}

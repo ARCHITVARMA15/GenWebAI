@@ -1,4 +1,5 @@
 import axios from 'axios'
+import ShapeGrid from '../components/ShapeGrid'
 import React from 'react'
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
@@ -157,7 +158,10 @@ function WebsiteEditor() {
 
     return (
         <div className='h-screen w-screen flex bg-black text-white overflow-hidden'>
-            <aside className='hidden lg:flex w-95 flex-col border-r border-white/10 bg-black/80'>
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <ShapeGrid speed={0.5} squareSize={40} direction="diagonal" borderColor="#2f293a" hoverFillColor="#222" shape="square" hoverTrailAmount={0} />
+            </div>
+            <aside className='hidden lg:flex w-95 flex-col border-r border-white/10 bg-black/80 relative z-[1]'>
                 <Header />
                 <>
                     <div className='flex-1 overflow-y-auto px-4 py-4 space-y-4'>
@@ -211,7 +215,7 @@ function WebsiteEditor() {
                 </>
             </aside>
 
-            <div className='flex-1 flex flex-col'>
+            <div className='flex-1 flex flex-col relative z-[1]'>
                 <div className='h-14 px-4 flex justify-between items-center border-b border-white/10 bg-black/80'>
                     <span className='text-xs text-zinc-400'>Live Preview</span>
                     <div className='flex gap-2'>
@@ -254,7 +258,7 @@ function WebsiteEditor() {
             </div>
 
             {showWidget && website && (
-                <aside className='w-80 shrink-0 border-l border-white/10 bg-black/80 flex flex-col overflow-y-auto'>
+                <aside className='w-80 shrink-0 border-l border-white/10 bg-black/80 flex flex-col overflow-y-auto relative z-[1]'>
                     <div className='h-14 px-4 flex items-center justify-between border-b border-white/10 shrink-0'>
                         <span className='text-xs font-semibold text-zinc-400 uppercase tracking-widest'>Chat Widget</span>
                         <button className='p-1.5 rounded-lg hover:bg-white/10' onClick={() => setShowWidget(false)}><X size={14} /></button>
@@ -264,7 +268,7 @@ function WebsiteEditor() {
             )}
 
             {showExperiment && website && (
-                <aside className='w-80 shrink-0 border-l border-white/10 bg-black/80 flex flex-col overflow-y-auto'>
+                <aside className='w-80 shrink-0 border-l border-white/10 bg-black/80 flex flex-col overflow-y-auto relative z-[1]'>
                     <div className='h-14 px-4 flex items-center justify-between border-b border-white/10 shrink-0'>
                         <div className='flex items-center gap-2'>
                             <FlaskConical size={14} className='text-indigo-400' />

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import ShapeGrid from '../components/ShapeGrid'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { ArrowLeft, Check, GitBranch, ImageIcon, Loader2, Plus, Trash2, X, Zap } from 'lucide-react'
@@ -174,6 +175,9 @@ function Portfolio() {
 
     return (
         <div className='min-h-screen text-white' style={{ background: 'linear-gradient(135deg, #050505 0%, #0b0b0b 50%, #050505 100%)' }}>
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <ShapeGrid speed={0.5} squareSize={40} direction="diagonal" borderColor="#2f293a" hoverFillColor="#222" shape="square" hoverTrailAmount={0} />
+            </div>
             {/* Navbar */}
             <div className='sticky top-0 z-40 backdrop-blur-xl bg-black/50 border-b border-white/10'>
                 <div className='max-w-5xl mx-auto px-6 h-16 flex items-center justify-between'>
@@ -195,7 +199,7 @@ function Portfolio() {
                 </div>
             </div>
 
-            <div className='max-w-5xl mx-auto px-6 py-12'>
+            <div className='max-w-5xl mx-auto px-6 py-12 relative z-[1]'>
 
                 {/* ── FORM STEP ── */}
                 {step === 'form' && (
@@ -218,7 +222,7 @@ function Portfolio() {
                         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
                             {/* Left column — required fields */}
                             <div className='lg:col-span-2 space-y-5'>
-                                <div className='rounded-2xl border border-white/10 bg-white/3 p-6 space-y-5'>
+                                <div className='rounded-2xl border border-white/10 bg-zinc-950 p-6 space-y-5'>
                                     <div className='flex items-center gap-2 mb-1'>
                                         <span className='text-xs font-semibold text-zinc-400 uppercase tracking-widest'>Required</span>
                                         <span className='w-2 h-2 rounded-full bg-red-500'></span>
@@ -232,7 +236,7 @@ function Portfolio() {
                                                 value={githubUrl}
                                                 onChange={e => setGithubUrl(e.target.value)}
                                                 placeholder='https://github.com/yourusername'
-                                                className='w-full pl-9 pr-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm outline-none focus:border-violet-500/50 transition placeholder-zinc-600'
+                                                className='w-full pl-9 pr-4 py-3 rounded-xl bg-zinc-900 border border-white/10 text-sm outline-none focus:border-violet-500/50 transition placeholder-zinc-600'
                                             />
                                         </div>
                                     </div>
@@ -244,7 +248,7 @@ function Portfolio() {
                                                 value={name}
                                                 onChange={e => setName(e.target.value)}
                                                 placeholder='e.g. Archit Varma'
-                                                className='w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm outline-none focus:border-violet-500/50 transition placeholder-zinc-600'
+                                                className='w-full px-4 py-3 rounded-xl bg-zinc-900 border border-white/10 text-sm outline-none focus:border-violet-500/50 transition placeholder-zinc-600'
                                             />
                                         </div>
                                         <div>
@@ -253,13 +257,13 @@ function Portfolio() {
                                                 value={title}
                                                 onChange={e => setTitle(e.target.value)}
                                                 placeholder='e.g. Full Stack Developer'
-                                                className='w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm outline-none focus:border-violet-500/50 transition placeholder-zinc-600'
+                                                className='w-full px-4 py-3 rounded-xl bg-zinc-900 border border-white/10 text-sm outline-none focus:border-violet-500/50 transition placeholder-zinc-600'
                                             />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className='rounded-2xl border border-white/8 bg-white/2 p-6 space-y-5'>
+                                <div className='rounded-2xl border border-white/8 bg-zinc-950 p-6 space-y-5'>
                                     <div className='flex items-center gap-2 mb-1'>
                                         <span className='text-xs font-semibold text-zinc-500 uppercase tracking-widest'>Optional</span>
                                         <span className='text-[10px] text-zinc-600'>More data = richer portfolio</span>
@@ -273,7 +277,7 @@ function Portfolio() {
                                             onChange={e => setLinkedinSummary(e.target.value)}
                                             placeholder='Paste your LinkedIn About section here...'
                                             rows={4}
-                                            className='w-full px-4 py-3 rounded-xl bg-black/40 border border-white/8 text-sm outline-none focus:border-violet-500/40 transition resize-none placeholder-zinc-600'
+                                            className='w-full px-4 py-3 rounded-xl bg-zinc-900 border border-white/8 text-sm outline-none focus:border-violet-500/40 transition resize-none placeholder-zinc-600'
                                         />
                                     </div>
 
@@ -286,7 +290,7 @@ function Portfolio() {
                                                 onChange={e => setCertInput(e.target.value)}
                                                 onKeyDown={e => e.key === 'Enter' && addCertUrl()}
                                                 placeholder='https://coursera.org/verify/...'
-                                                className='flex-1 px-4 py-2.5 rounded-xl bg-black/40 border border-white/8 text-sm outline-none focus:border-violet-500/40 transition placeholder-zinc-600'
+                                                className='flex-1 px-4 py-2.5 rounded-xl bg-zinc-900 border border-white/8 text-sm outline-none focus:border-violet-500/40 transition placeholder-zinc-600'
                                             />
                                             <button
                                                 onClick={addCertUrl}
@@ -319,7 +323,7 @@ function Portfolio() {
                                             onChange={e => setCustomNote(e.target.value)}
                                             placeholder='e.g. Looking for ML engineering roles. Built an autonomous drone at my university hackathon. Prefer a dark, minimal aesthetic.'
                                             rows={3}
-                                            className='w-full px-4 py-3 rounded-xl bg-black/40 border border-white/8 text-sm outline-none focus:border-violet-500/40 transition resize-none placeholder-zinc-600'
+                                            className='w-full px-4 py-3 rounded-xl bg-zinc-900 border border-white/8 text-sm outline-none focus:border-violet-500/40 transition resize-none placeholder-zinc-600'
                                         />
                                     </div>
                                 </div>
@@ -331,7 +335,7 @@ function Portfolio() {
 
                             {/* Right column — images + generate */}
                             <div className='space-y-5'>
-                                <div className='rounded-2xl border border-white/8 bg-white/2 p-5'>
+                                <div className='rounded-2xl border border-white/8 bg-zinc-950 p-5'>
                                     <div className='flex items-center justify-between mb-3'>
                                         <div>
                                             <p className='text-sm font-medium'>Profile & Project Images</p>
@@ -371,7 +375,7 @@ function Portfolio() {
                                     )}
                                 </div>
 
-                                <div className='rounded-2xl border border-white/8 bg-white/2 p-5'>
+                                <div className='rounded-2xl border border-white/8 bg-zinc-950 p-5'>
                                     <p className='text-xs text-zinc-500 mb-3 leading-relaxed'>
                                         We'll fetch your GitHub repos, detect your skills, optionally scrape certifications, then generate a premium portfolio in one shot.
                                     </p>

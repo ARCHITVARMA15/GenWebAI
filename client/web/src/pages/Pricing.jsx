@@ -1,4 +1,5 @@
 import { ArrowLeft, Check, Coins, Zap } from 'lucide-react'
+import ShapeGrid from '../components/ShapeGrid'
 import { motion } from 'motion/react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -130,6 +131,9 @@ function Pricing() {
     return (
         <>
         <div className='min-h-screen bg-[#040404] text-white'>
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <ShapeGrid speed={0.5} squareSize={40} direction="diagonal" borderColor="#2f293a" hoverFillColor="#222" shape="square" hoverTrailAmount={0} />
+            </div>
             <div className='sticky top-0 z-40 backdrop-blur-xl bg-black/50 border-b border-white/10'>
                 <div className='max-w-7xl mx-auto px-6 h-16 flex items-center justify-between'>
                     <div className='flex items-center gap-4'>
@@ -148,7 +152,7 @@ function Pricing() {
                 </div>
             </div>
 
-            <div className='max-w-5xl mx-auto px-6 py-20'>
+            <div className='max-w-5xl mx-auto px-6 py-20 relative z-[1]'>
                 <motion.div
                     initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -178,7 +182,7 @@ function Pricing() {
                                 transition={{ delay: i * 0.1 }}
                                 className={`relative rounded-2xl p-6 flex flex-col gap-5 border transition-all ${isPopular
                                     ? "bg-white text-black border-white"
-                                    : "bg-white/5 border-white/10 hover:border-white/30"
+                                    : "bg-zinc-900 border-white/10 hover:border-white/30"
                                     }`}
                             >
                                 {pack.tag && (
@@ -195,7 +199,7 @@ function Pricing() {
                                     <p className={`text-xs mt-1 ${isPopular ? "text-black/50" : "text-zinc-500"}`}>{pack.perCredit}</p>
                                 </div>
 
-                                <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold ${isPopular ? "bg-black/10" : "bg-white/5"}`}>
+                                <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold ${isPopular ? "bg-black/10" : "bg-zinc-800"}`}>
                                     <Coins size={15} className='text-yellow-400' />
                                     {pack.credits.toLocaleString()} credits
                                 </div>

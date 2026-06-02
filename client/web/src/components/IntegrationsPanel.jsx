@@ -33,7 +33,7 @@ function IntegrationsPanel({ onClose, onApplyIntegrations, isLoading }) {
     const hasInput = address.trim() || twitter.trim() || instagram.trim() || linkedin.trim() || facebook.trim();
 
     return (
-        <div className="flex flex-col h-full bg-zinc-900 border-l border-white/10 w-80 text-white">
+        <div className="flex flex-col h-full bg-zinc-900 border-l border-white/10 w-80 text-white relative z-[1]">
             <div className="h-14 px-4 flex items-center justify-between border-b border-white/10 shrink-0">
                 <div className="flex items-center gap-2">
                     <Link2 size={14} className="text-blue-400" />

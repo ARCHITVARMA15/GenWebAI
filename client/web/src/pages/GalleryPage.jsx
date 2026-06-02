@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import ShapeGrid from '../components/ShapeGrid'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
@@ -122,6 +123,9 @@ function GalleryPage() {
 
     return (
         <div className='min-h-screen bg-[#050505] text-white'>
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <ShapeGrid speed={0.5} squareSize={40} direction="diagonal" borderColor="#2f293a" hoverFillColor="#222" shape="square" hoverTrailAmount={0} />
+            </div>
             <div className='sticky top-0 z-40 backdrop-blur-xl bg-black/50 border-b border-white/10'>
                 <div className='max-w-7xl mx-auto px-6 h-16 flex items-center justify-between'>
                     <div className='flex items-center gap-4'>
@@ -141,7 +145,7 @@ function GalleryPage() {
                 </div>
             </div>
 
-            <div className='max-w-7xl mx-auto px-6 py-10'>
+            <div className='max-w-7xl mx-auto px-6 py-10 relative z-[1]'>
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className='mb-8'>
                     <h1 className='text-3xl font-bold mb-1'>Community Gallery</h1>
                     <p className='text-zinc-400 text-sm'>Websites built by our community — upvote your favorites</p>
@@ -187,7 +191,7 @@ function GalleryPage() {
                 {loading && (
                     <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6'>
                         {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className='rounded-2xl bg-white/5 border border-white/10 overflow-hidden animate-pulse'>
+                            <div key={i} className='rounded-2xl bg-zinc-900 border border-white/10 overflow-hidden animate-pulse'>
                                 <div className='h-44 bg-zinc-800' />
                                 <div className='p-4 space-y-3'>
                                     <div className='h-4 w-3/4 bg-zinc-700 rounded' />
@@ -219,7 +223,7 @@ function GalleryPage() {
                                         initial={{ opacity: 0, y: 16 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: i < 12 ? i * 0.04 : 0 }}
-                                        className='rounded-2xl bg-white/5 border border-white/10 overflow-hidden hover:bg-white/[0.07] transition flex flex-col'
+                                        className='rounded-2xl bg-zinc-900 border border-white/10 overflow-hidden hover:bg-zinc-800 transition flex flex-col'
                                     >
                                         <IframeCard src={site.deployedUrl} title={site.title} />
 

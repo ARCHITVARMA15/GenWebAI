@@ -1,4 +1,5 @@
 import { ArrowLeft, Check, BarChart2, Globe, LayoutGrid, Rocket, Search, Share2, Trash2, X, ScanEye, Sparkles } from 'lucide-react'
+import ShapeGrid from '../components/ShapeGrid'
 import React, { useEffect, useState } from 'react'
 import { motion } from "motion/react"
 import { useSelector } from 'react-redux'
@@ -93,6 +94,9 @@ function Dashboard() {
 
     return (
         <div className='min-h-screen bg-[#050505] text-white'>
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <ShapeGrid speed={0.5} squareSize={40} direction="diagonal" borderColor="#2f293a" hoverFillColor="#222" shape="square" hoverTrailAmount={0} />
+            </div>
             <div className='sticky top-0 z-40 backdrop-blur-xl bg-black/50 border-b border-white/10'>
                 <div className='max-w-7xl mx-auto px-6 h-16 flex items-center justify-between'>
                     <div className='flex items-center gap-4'>
@@ -126,7 +130,7 @@ function Dashboard() {
                     </div>
                 </div>
             </div>
-            <div className='max-w-7xl mx-auto px-6 py-10'>
+            <div className='max-w-7xl mx-auto px-6 py-10 relative z-[1]'>
                 <motion.div
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -154,7 +158,7 @@ function Dashboard() {
                 {!loading && !error && websites?.length > 0 && (<>
                     <div className='relative mb-6 max-w-sm'>
                         <Search size={14} className='absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500' />
-                        <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Search websites…' className='w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm outline-none focus:ring-2 focus:ring-white/20 placeholder:text-zinc-600' />
+                        <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Search websites…' className='w-full pl-9 pr-4 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-sm outline-none focus:ring-2 focus:ring-white/20 placeholder:text-zinc-600' />
                     </div>
                     {search && websites.filter(w => w.title?.toLowerCase().includes(search.toLowerCase())).length === 0 && <p className='text-zinc-500 text-sm mb-4'>No websites match "{search}"</p>}
                     <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8'>
@@ -163,7 +167,7 @@ function Dashboard() {
                             animate={{ opacity: 1, y: 0 }}
                             whileHover={{ y: -6 }}
                             onClick={() => navigate('/clone')}
-                            className="rounded-2xl border border-dashed border-violet-500/40 bg-violet-500/5 hover:bg-violet-500/10 hover:border-violet-500/60 transition cursor-pointer flex flex-col items-center justify-center gap-3 min-h-[220px] p-6"
+                            className="rounded-2xl border border-dashed border-violet-500/40 bg-violet-950 hover:bg-violet-900 hover:border-violet-500/60 transition cursor-pointer flex flex-col items-center justify-center gap-3 min-h-[220px] p-6"
                         >
                             <div className='w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center'>
                                 <ScanEye size={22} className='text-violet-400' />
@@ -178,7 +182,7 @@ function Dashboard() {
                             animate={{ opacity: 1, y: 0 }}
                             whileHover={{ y: -6 }}
                             onClick={() => navigate('/generate', { state: { mode: 'brand' } })}
-                            className="rounded-2xl border border-dashed border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 hover:border-purple-500/60 transition cursor-pointer flex flex-col items-center justify-center gap-3 min-h-[220px] p-6"
+                            className="rounded-2xl border border-dashed border-purple-500/40 bg-purple-950 hover:bg-purple-900 hover:border-purple-500/60 transition cursor-pointer flex flex-col items-center justify-center gap-3 min-h-[220px] p-6"
                         >
                             <div className='w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center'>
                                 <Sparkles size={22} className='text-purple-400' />
@@ -199,7 +203,7 @@ function Dashboard() {
                                 transition={{ delay: i * 0.05 }}
                                 whileHover={{ y: -6 }}
                                
-                                className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden hover:bg-white/10 transition flex flex-col"
+                                className="rounded-2xl bg-zinc-900 border border-white/10 overflow-hidden hover:bg-zinc-800 transition flex flex-col"
                             >
                                 <div className='relative h-40 bg-black cursor-pointer'  onClick={()=>navigate(`/editor/${w._id}`)}>
                                     <iframe srcDoc={w.latestCode} className='absolute inset-0 w-[140%] h-[140%] scale-[0.72] origin-top-left pointer-events-none bg-white' />

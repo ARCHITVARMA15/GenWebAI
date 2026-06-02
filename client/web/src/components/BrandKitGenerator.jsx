@@ -153,7 +153,7 @@ function BrandKitGenerator() {
 
             <div className="flex flex-wrap gap-2 justify-center mb-6">
                 {BADGES.map(b => (
-                    <span key={b} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-purple-500/10 border border-purple-500/25 text-purple-300">
+                    <span key={b} className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium bg-purple-500/10 border border-purple-500/25 text-purple-300 shrink-0">
                         <Sparkles size={10} /> {b}
                     </span>
                 ))}
@@ -165,7 +165,7 @@ function BrandKitGenerator() {
                     onChange={e => { setPrompt(e.target.value); setError('') }}
                     placeholder={PLACEHOLDERS[placeholderIdx]}
                     rows={4}
-                    className="w-full px-6 py-5 rounded-2xl bg-black/60 border border-white/10 outline-none resize-none text-sm leading-relaxed focus:ring-2 focus:ring-purple-500/40 placeholder:text-zinc-600 transition"
+                    className="w-full px-6 py-5 rounded-2xl bg-zinc-900 border border-white/10 outline-none resize-none text-sm leading-relaxed focus:ring-2 focus:ring-purple-500/40 placeholder:text-zinc-600 transition"
                 />
                 <span className="absolute bottom-4 right-5 text-[11px] text-zinc-600">{prompt.length}/500</span>
             </div>
@@ -198,7 +198,7 @@ function BrandKitGenerator() {
                 <p className="text-sm text-zinc-400 mt-1">This takes about 20 seconds</p>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
+            <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 space-y-4">
                 {GEN_STEPS.map((step, idx) => {
                     const stepNum = idx + 1
                     const done = genStep > stepNum
@@ -239,7 +239,7 @@ function BrandKitGenerator() {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 {/* LEFT: Brand Kit Card */}
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}
-                    className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6"
+                    className="bg-zinc-900 border border-white/10 rounded-2xl p-6 space-y-6"
                 >
                     {/* Business name + tagline */}
                     <div>
@@ -287,11 +287,11 @@ function BrandKitGenerator() {
                     <div>
                         <p className="text-xs font-medium text-zinc-400 mb-3 flex items-center gap-1.5"><Type size={12} /> Typography</p>
                         <div className="flex gap-4">
-                            <div className="flex-1 bg-black/40 rounded-xl p-3 border border-white/5">
+                            <div className="flex-1 bg-zinc-900 rounded-xl p-3 border border-white/5">
                                 <p className="text-[10px] text-zinc-600 mb-1">Heading — {brandKit.headingFont}</p>
                                 <p className="text-3xl font-bold leading-none" style={{ fontFamily: `'${brandKit.headingFont}', serif`, color: brandKit.primaryColor }}>Aa</p>
                             </div>
-                            <div className="flex-1 bg-black/40 rounded-xl p-3 border border-white/5">
+                            <div className="flex-1 bg-zinc-900 rounded-xl p-3 border border-white/5">
                                 <p className="text-[10px] text-zinc-600 mb-1">Body — {brandKit.bodyFont}</p>
                                 <p className="text-3xl leading-none" style={{ fontFamily: `'${brandKit.bodyFont}', sans-serif`, color: brandKit.primaryColor }}>Aa</p>
                             </div>
@@ -314,7 +314,7 @@ function BrandKitGenerator() {
 
                 {/* RIGHT: Website Preview */}
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
-                    className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col"
+                    className="bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden flex flex-col"
                 >
                     <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
                         <span className="text-xs font-medium text-zinc-400">Website Preview</span>
@@ -362,7 +362,7 @@ function BrandKitGenerator() {
 
             {/* Action bar */}
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="flex flex-wrap items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-5 py-4"
+                className="flex flex-wrap items-center gap-3 bg-zinc-900 border border-white/10 rounded-2xl px-5 py-4"
             >
                 <button onClick={handleRegenLogo} disabled={regenLoading}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-white/10 hover:bg-white/15 border border-white/10 transition disabled:opacity-50">
