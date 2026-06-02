@@ -486,7 +486,7 @@ function Home() {
               >
                 <span style={{ display: 'block', color: '#ffffff' }}>Type a thought.</span>
                 <span style={{ display: 'block', marginTop: '6px' }}>
-                  <span className="gradient-text" style={{ fontStyle: 'italic', fontWeight: 900, animation: 'watchGlow 2.5s ease-in-out infinite' }}>Watch</span>
+                  <span className="gradient-text" style={{ fontStyle: 'italic', fontWeight: 900, textShadow: '0 0 40px rgba(140,82,255,0.7), 0 0 80px rgba(255,77,228,0.35)' }}>Watch</span>
                   <span style={{ color: '#ffffff' }}> a website</span>
                 </span>
                 <span style={{ display: 'block', color: '#ffffff', marginTop: '6px', opacity: 0.7 }}>come alive.</span>
