@@ -1,110 +1,199 @@
-# GenWeb.ai - AI-Powered Website Builder
+# GenWeb.ai — AI-Powered Website Builder
 
-**GenWeb.ai** is a premium, full-stack SaaS platform that allows users to instantly generate fully branded, production-ready websites using simple text prompts. Leveraging advanced LLMs and a stunning web interface, GenWeb.ai turns thoughts into deployable live code.
+**GenWeb.ai** is a full-stack SaaS platform that generates complete, branded websites from a single text prompt. It features Vision AI cloning, RAG-powered chat widgets, Brand Kit generation, GitHub portfolio generation, and a statistical A/B testing engine — built on the MERN stack with Razorpay payments.
 
-![GenWeb.ai](https://via.placeholder.com/1200x600?text=GenWeb.ai+Cinematic+Landing+Page)
+🌐 **Live:** [gen-web-ai-one.vercel.app](https://gen-web-ai-one.vercel.app)
 
-## ✨ Key Features
+---
 
-*   **Cinematic Landing Experience:** A breathtaking, high-conversion landing page featuring a full-screen, 3D rotating geometry backdrop with a complex staggered "hero-reveal" animation lifecycle.
-*   **Prompt to Website:** Users input a single sentence, and the AI handles the design, copywriting, color palette, and generation of HTML/CSS/JS.
-*   **Live Preview & Editor:** An interactive browser-mockup environment internally rendering the generated website logic in real-time.
-*   **Vision Clone (Brand Kit):** Automatically extract layout, styling, and color profiles via screenshot analysis and image embeddings.
-*   **Authentication:** Full user sign-up, sign-in, and auth-state preservation (powered by JWT & Firebase).
-*   **Credit System & Payments:** Included credit deduction system and top-up functionality handled securely via Razorpay integrations.
-*   **A/B Testing & Live Gallery:** Compare designs and explore community-generated layouts.
+## ✨ Features
+
+### Core
+- **Prompt → Website** — Describe your idea in one sentence. AI generates a fully branded, deployable HTML/CSS/JS website with logo, colors, copy, and all.
+- **Live Editor** — Chat-based editor to modify any generated site. Changes stream in real-time in a live preview.
+- **One-Click Deploy** — Publish any site to a shareable public URL instantly.
+- **Live Gallery** — Browse all publicly deployed sites from the community.
+
+### Brand Kit (Brand Mode)
+- Enter a business description and AI generates a complete brand identity: SVG logo, color palette, typography pair, tagline, and a full branded website — all in one shot.
+
+### Vision Clone
+- Paste any website URL or upload a screenshot. AI clones the layout, color scheme, and structure into a new editable site.
+
+### GitHub Portfolio Generator
+- Drop a GitHub profile URL, add your name and LinkedIn bio. AI fetches your repos, detects skills from languages, and generates a premium developer portfolio — no writing required. Supports certification URLs and profile image uploads.
+
+### AI Chat Widget
+- Every generated site gets an embedded RAG-powered chat widget. Visitors can ask questions about the site and get accurate answers grounded in the site's content (Voyage AI embeddings + Groq LLM).
+
+### A/B Testing Engine
+- Automatically generates a Variant B for any site section using GPT-4o. Tracks visits and clicks per variant. Calculates statistical confidence (Z-test). Nightly cron auto-declares a winner at ≥80% confidence with ≥100 visitors.
+
+### Analytics
+- Per-site visit and click tracking. Experiment dashboards with live CVR data.
+
+### Payments & Credits
+- Credit-based system. Buy credits via Razorpay (INR). Credits never expire. Each website generation costs ~25 credits.
+
+---
 
 ## 🛠️ Tech Stack
 
 ### Frontend (`/client/web`)
-*   **Framework:** React + Vite
-*   **Styling:** Tailwind CSS + Custom CSS (for deep glassmorphism and cinematic animations)
-*   **Animations:** `framer-motion` (complex orchestration, staggered reveals)
-*   **State Management:** Redux Toolkit 
-*   **Routing:** React Router v6
+| Layer | Tech |
+|---|---|
+| Framework | React 19 + Vite |
+| Styling | Tailwind CSS v4 |
+| Animations | Framer Motion (`motion/react`) |
+| State | Redux Toolkit |
+| Routing | React Router v6 |
+| Auth | Firebase (Google OAuth) |
+| HTTP | Axios |
 
 ### Backend (`/server`)
-*   **Environment:** Node.js + Express
-*   **Database:** MongoDB (Mongoose)
-*   **AI Integration:** OpenRouter, Groq, Voyage AI (for embeddings and code generation)
-*   **Cloud Storage:** Cloudinary (for storing generated assets/thumbnails)
-*   **Headless Browser Engine:** Puppeteer (for generating website screenshots)
-*   **Payments:** Razorpay API
+| Layer | Tech |
+|---|---|
+| Runtime | Node.js + Express 5 |
+| Database | MongoDB + Mongoose |
+| AI — Generation | OpenRouter (GPT-4o, Claude, Llama) |
+| AI — Chat/RAG | Groq (Llama-3.3-70b) + Voyage AI (embeddings) |
+| Storage | Cloudinary |
+| Screenshots | Puppeteer |
+| Auth | JWT (httpOnly cookies) + Firebase Admin |
+| Payments | Razorpay |
+| Rate Limiting | express-rate-limit |
+| Security | Helmet |
+| Cron | node-cron |
+
+### Deployment
+| Service | Platform |
+|---|---|
+| Frontend | Vercel |
+| Backend | Railway |
+| Database | MongoDB Atlas |
 
 ---
 
-## 🚀 Local Setup Instructions
-
-Follow these step-by-step instructions to get the development server running locally on your laptop.
+## 🚀 Local Setup
 
 ### Prerequisites
-*   [Node.js](https://nodejs.org/en/) (v16.0 or higher)
-*   [MongoDB](https://www.mongodb.com/) (Local installation or a free Atlas cluster)
-*   API keys for AI providers (OpenRouter/Groq), Razorpay, and Cloudinary.
+- Node.js v18+
+- MongoDB Atlas cluster (or local MongoDB)
+- API keys: OpenRouter, Groq, Voyage AI, Cloudinary, Razorpay, Firebase
 
-### 1. Clone the repository
+### 1. Clone
 ```bash
-git clone https://github.com/your-username/genweb-ai.git
-cd genweb-ai
+git clone https://github.com/ARCHITVARMA15/GenWebAI.git
+cd GenWebAI
 ```
 
-### 2. Backend Setup
-1. Navigate to the `server` directory:
-   ```bash
-   cd server
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Set up environment variables:
-   * Copy the `.env.example` file to create a new `.env` file:
-     ```bash
-     cp .env.example .env
-     ```
-   * Open the new `.env` file and fill in your actual API keys, MongoDB URL, and backend secrets.
-4. Start the backend development server:
-   ```bash
-   npm run dev
-   ```
-   > The server will start on `http://localhost:5000`.
+### 2. Backend
+```bash
+cd server
+npm install
+cp .env.example .env
+# Fill in all values in .env
+npm run dev
+```
+Server starts on `http://localhost:5000`.
 
-### 3. Frontend Setup
-1. Open a new terminal and navigate to the frontend directory:
-   ```bash
-   cd client/web
-   ```
-2. Install frontend dependencies:
-   ```bash
-   npm install
-   ```
-3. Set up environment variables:
-   * Copy the `.env.example` file to create a new `.env` file:
-     ```bash
-     cp .env.example .env
-     ```
-   * Open the `.env` file and ensure `VITE_SERVER_URL` points to your backend (`http://localhost:5000`). Include any required frontend API keys (like Firebase and Razorpay).
-4. Start the frontend Vite server:
-   ```bash
-   npm run dev
-   ```
-   > The frontend application will start up (typically on `http://localhost:5174`).
+#### Backend `.env` variables
+```env
+PORT=5000
+MONGODB_URL=mongodb+srv://<user>:<pass>@cluster.mongodb.net/mydb
+JWT_SECRET=your_jwt_secret
 
-### 4. You're Good to Go!
-Open your browser and navigate to the frontend URL to start building websites with AI!
+FRONTEND_URL=http://localhost:5173        # For CORS
+BACKEND_URL=http://localhost:5000         # Injected into generated site tracking scripts
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# AI Providers
+OPENROUTER_API_KEY=sk-or-v1-...
+GROQ_API_KEY=gsk_...
+VOYAGE_API_KEY=pa-...
+
+# Payments
+RAZORPAY_KEY_ID=rzp_test_...
+RAZORPAY_KEY_SECRET=
+
+NODE_ENV=development
+```
+
+### 3. Frontend
+```bash
+cd client/web
+npm install
+```
+
+Create `client/web/.env`:
+```env
+VITE_SERVER_URL=http://localhost:5000
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+```
+
+```bash
+npm run dev
+```
+Frontend starts on `http://localhost:5173`.
+
+### 4. Open the app
+Navigate to `http://localhost:5173`. Sign in with Google and start generating.
 
 ---
 
-## 🎨 UI/UX Architecture
+## ☁️ Production Deployment
 
-The design language of GenWeb.ai focuses on a "Premium Web3 / NextGen Tech" aesthetic:
-*   **Typography:** Strict sans-serif hierarchies (Inter).
-*   **Color Palette:** Deep void blacks juxtaposed against neon cyan (`#2ae0ff`), pulsing violet (`#8c52ff`), and hot pink (`#ff4de4`) accents.
-*   **Depth:** Extensive use of CSS inset box-shadows, radial lighting/glow orbs, and dark vignettes to preserve focal points.
-*   **Micro-interactions:** Interactive gradients (`gradient-text`), particle drifts, and seamless fade-looping on the underlying 3D video.
+### Backend → Railway
+1. Connect your GitHub repo to Railway.
+2. Set **Root Directory** to `server`.
+3. Set these environment variables in Railway:
+   - All variables from `.env.example`
+   - `NODE_ENV=production`
+   - `FRONTEND_URL=https://your-vercel-domain.vercel.app`
+   - `BACKEND_URL=https://your-railway-domain.up.railway.app`
+4. Railway auto-deploys on every push to `main`.
 
-## 🤝 Contributing
-Contributions, issues, and feature requests are welcome!
+### Frontend → Vercel
+1. Connect your GitHub repo to Vercel.
+2. Set **Root Directory** to `client/web`.
+3. Set these environment variables in Vercel:
+   - `VITE_SERVER_URL=https://your-railway-domain.up.railway.app` *(must include `https://`)*
+   - `VITE_FIREBASE_API_KEY=your_firebase_api_key`
+4. Vercel auto-deploys on every push to `main`.
+
+> **Important:** `VITE_SERVER_URL` must include the full `https://` prefix, otherwise requests will be treated as relative paths and fail with 404.
+
+---
+
+## 📁 Project Structure
+
+```
+GenWebAI/
+├── client/
+│   └── web/                  # React + Vite frontend
+│       ├── src/
+│       │   ├── pages/        # Home, Dashboard, Generate, Editor, Pricing, Gallery, Portfolio
+│       │   ├── components/   # LoginModal, BrandKitGenerator, CloneWebsite, ShapeGrid, ...
+│       │   ├── hooks/        # useGetCurrentUser, ...
+│       │   ├── redux/        # userSlice, store
+│       │   └── config.js     # serverUrl config
+│       └── vercel.json       # SPA rewrite rules
+└── server/                   # Express backend
+    ├── controllers/          # auth, user, website, analytics, brand, clone, portfolio, ...
+    ├── routes/               # All API route definitions
+    ├── models/               # Mongoose schemas (User, Website, Experiment, ...)
+    ├── services/             # brandKitService, embeddingService, chatService, abTestingService
+    ├── middlewares/          # isAuth, rateLimiter
+    ├── jobs/                 # experimentCron (nightly A/B evaluator)
+    ├── config/               # db, openRouter, aiModels
+    └── index.js              # Entry point
+```
+
+---
 
 ## 📄 License
-This project is proprietary. All rights reserved.
+Proprietary. All rights reserved.
