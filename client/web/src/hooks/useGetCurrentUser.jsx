@@ -16,7 +16,6 @@ function useGetCurrentUser() {
             try{
                 const result = await axios.get(`${serverUrl}/api/user/me`,{withCredentials:true})
                 const normalizedUser = result.data?.user ?? result.data ?? null
-                console.log('Current user:', normalizedUser)
                 dispatch(setUserData(normalizedUser))
 
             }catch(error){
